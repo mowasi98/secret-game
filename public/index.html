@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret - Set Up Profile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Game-themed floating emojis -->
+        <div class="sparkle" style="top: 8%; left: 12%;">🔥</div>
+        <div class="sparkle" style="top: 15%; right: 10%; animation-delay: 0.7s;">🌶️</div>
+        <div class="sparkle" style="top: 25%; left: 8%; animation-delay: 1.4s;">😜</div>
+        <div class="sparkle" style="top: 35%; right: 15%; animation-delay: 2.1s;">🎉</div>
+        <div class="sparkle" style="top: 45%; left: 5%; animation-delay: 0.9s;">💋</div>
+        <div class="sparkle" style="top: 55%; right: 8%; animation-delay: 1.8s;">🤫</div>
+        <div class="sparkle" style="top: 65%; left: 10%; animation-delay: 2.5s;">🎭</div>
+        <div class="sparkle" style="top: 75%; right: 12%; animation-delay: 1.2s;">💥</div>
+        <div class="sparkle" style="bottom: 20%; left: 15%; animation-delay: 1.6s;">🔒</div>
+        <div class="sparkle" style="bottom: 30%; right: 18%; animation-delay: 2.3s;">😋</div>
+        <div class="sparkle" style="bottom: 12%; left: 20%; animation-delay: 0.5s;">🎡</div>
+        <div class="sparkle" style="bottom: 8%; right: 22%; animation-delay: 1.1s;">💬</div>
+
+        <div class="page" id="splashScreen">
+            <div class="logo">
+                <div style="font-size: 6rem;">🎭</div>
+                <div class="logo-text">SECRET</div>
+            </div>
+        </div>
+
+        <div class="page hidden" id="profileSetup">
+            <div class="text-bubble">
+                Set up your profile so your friends know who's playing!
+            </div>
+
+            <input 
+                type="text" 
+                class="glass-input" 
+                id="nameInput" 
+                placeholder="Your name" 
+                maxlength="20"
+            >
+
+            <label for="photoInput" class="profile-upload" id="profileUploadLabel">
+                <span class="camera-icon" id="cameraIcon">📷</span>
+                <img id="profilePreview" style="display: none;" alt="Profile">
+                <input type="file" id="photoInput" accept="image/*">
+            </label>
+
+            <div class="gender-selector">
+                <button class="gender-btn" data-gender="boy">Boy</button>
+                <button class="gender-btn" data-gender="girl">Girl</button>
+            </div>
+
+            <button class="glass-btn" id="continueBtn" disabled>
+                Continue ➜
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        let profileData = {
+            name: '',
+            photo: '',
+            gender: ''
+        };
+
+        // Splash screen transition
+        setTimeout(() => {
+            document.getElementById('splashScreen').classList.add('hidden');
+            document.getElementById('profileSetup').classList.remove('hidden');
+        }, 2000);
+
+        // Photo upload
+        const photoInput = document.getElementById('photoInput');
+        const profilePreview = document.getElementById('profilePreview');
+        const cameraIcon = document.getElementById('cameraIcon');
+
+        photoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    profileData.photo = e.target.result;
+                    profilePreview.src = e.target.result;
+                    profilePreview.style.display = 'block';
+                    cameraIcon.style.display = 'none';
+                    checkFormComplete();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Name input
+        document.getElementById('nameInput').addEventListener('input', (e) => {
+            profileData.name = e.target.value.trim();
+            checkFormComplete();
+        });
+
+        // Gender selection
+        document.querySelectorAll('.gender-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                profileData.gender = btn.dataset.gender;
+                checkFormComplete();
+            });
+        });
+
+        // Check if form is complete
+        function checkFormComplete() {
+            const isComplete = profileData.name && profileData.photo && profileData.gender;
+            document.getElementById('continueBtn').disabled = !isComplete;
+        }
+
+        // Continue button
+        document.getElementById('continueBtn').addEventListener('click', () => {
+            // Send profile to server
+            socket.emit('set-profile', profileData);
+            
+            // Store in localStorage
+            localStorage.setItem('secretProfile', JSON.stringify(profileData));
+            
+            // Redirect to main menu
+            window.location.href = '/menu.html';
+        });
+
+        // Check if profile already exists and pre-fill (but still show splash)
+        const savedProfile = localStorage.getItem('secretProfile');
+        if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            
+            // Pre-fill data when profile setup appears
+            setTimeout(() => {
+                profileData = profile;
+                document.getElementById('nameInput').value = profile.name;
+                profilePreview.src = profile.photo;
+                profilePreview.style.display = 'block';
+                cameraIcon.style.display = 'none';
+                
+                const genderBtn = document.querySelector(`[data-gender="${profile.gender}"]`);
+                if (genderBtn) genderBtn.classList.add('selected');
+                
+                checkFormComplete();
+            }, 2100); // After splash screen
+        }
+    </script>
+</body>
+</html>

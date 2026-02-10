@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret - Lobby</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Game-themed floating emojis -->
+        <div class="sparkle" style="top: 8%; left: 10%;">🎉</div>
+        <div class="sparkle" style="top: 16%; right: 8%; animation-delay: 0.9s;">🔥</div>
+        <div class="sparkle" style="top: 25%; left: 12%; animation-delay: 1.6s;">🌶️</div>
+        <div class="sparkle" style="top: 35%; right: 15%; animation-delay: 2.3s;">😜</div>
+        <div class="sparkle" style="top: 48%; left: 8%; animation-delay: 1.2s;">💋</div>
+        <div class="sparkle" style="top: 58%; right: 10%; animation-delay: 2.0s;">🤫</div>
+        <div class="sparkle" style="top: 68%; left: 15%; animation-delay: 0.7s;">🎭</div>
+        <div class="sparkle" style="bottom: 22%; right: 12%; animation-delay: 1.5s;">💥</div>
+        <div class="sparkle" style="bottom: 30%; left: 18%; animation-delay: 2.2s;">🔒</div>
+        <div class="sparkle" style="bottom: 12%; right: 20%; animation-delay: 0.5s;">😋</div>
+        <div class="sparkle" style="bottom: 8%; left: 22%; animation-delay: 1.8s;">🎡</div>
+
+        <div class="close-btn" id="leaveBtn">✖</div>
+
+        <div class="page" id="lobbyPage">
+            <div class="text-bubble">
+                Need at least 3 players! Share this PIN to get started!
+            </div>
+
+            <!-- Game PIN -->
+            <div class="game-pin-display">
+                <div class="game-pin-label">GAME PIN</div>
+                <div class="game-pin-code" id="gamePinDisplay">------</div>
+            </div>
+
+            <!-- Players in circle -->
+            <div class="players-lobby">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-block; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(15px); padding: 12px 28px; border-radius: 25px; font-size: 1.2rem; font-weight: 700; border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);">
+                        <span id="playerCount">0</span> / 10 Players
+                    </div>
+                </div>
+                <div class="players-circle" id="playersCircle">
+                    <!-- Center logo -->
+                    <div class="circle-center-logo">
+                        <div class="center-emoji">🎭</div>
+                        <div class="center-text">SECRET</div>
+                    </div>
+                    <!-- Players will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- Start button (admin only) -->
+            <button class="glass-btn hidden" id="selectModeBtn">
+                Select Game Mode
+            </button>
+        </div>
+
+        <!-- Mode selection (admin only) -->
+        <div class="page hidden" id="modeSelectionPage">
+            <div class="back-btn" id="backToLobby">←</div>
+
+            <div style="font-size: 2.5rem; font-weight: bold; text-align: center; margin: 30px 0;">
+                GAME MODE
+            </div>
+
+            <div class="mode-list">
+                <!-- Anonymous Wheel -->
+                <div class="mode-card" data-mode="wheel">
+                    <div class="mode-header">
+                        <span class="mode-emoji">🎡</span>
+                        <span class="mode-title">Anonymous Wheel</span>
+                        <span class="mode-emoji">🤐</span>
+                    </div>
+                    <div class="mode-description">
+                        Anonymously, each player will write a dare, a personal question, gossip, and a secret. The wheel will take care of the rest.
+                    </div>
+                </div>
+
+                <!-- Spicy -->
+                <div class="mode-card" data-mode="spicy">
+                    <div class="mode-header">
+                        <span class="mode-emoji">🌶️</span>
+                        <span class="mode-title">Spicy</span>
+                        <span class="mode-emoji">🔥</span>
+                    </div>
+                    <div class="mode-description">
+                        With crazy dares and personal questions, this day will be one to remember. It's wild how this kind of game can bring you closer together.
+                    </div>
+                </div>
+
+                <!-- For Party -->
+                <div class="mode-card" data-mode="party">
+                    <div class="mode-header">
+                        <span class="mode-emoji">🎉</span>
+                        <span class="mode-title">For Party</span>
+                        <span class="mode-emoji">💥</span>
+                    </div>
+                    <div class="mode-description">
+                        On the agenda tonight are questions and dares designed to create maximum tension. Arguments likely.
+                    </div>
+                </div>
+
+                <!-- Cheeky -->
+                <div class="mode-card" data-mode="cheeky">
+                    <div class="mode-header">
+                        <span class="mode-emoji">😜</span>
+                        <span class="mode-title">Cheeky</span>
+                        <span class="mode-emoji">😋</span>
+                    </div>
+                    <div class="mode-description">
+                        This pack will add some fun, positive energy to your evening as you explore each other's personalities.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const gameCode = localStorage.getItem('currentGameCode');
+        const profile = JSON.parse(localStorage.getItem('secretProfile'));
+
+        if (!gameCode || !profile) {
+            window.location.href = '/';
+        }
+
+        let isAdmin = false;
+        let currentGame = null;
+        let socketConnected = false;
+        let modeSelecting = false;
+
+        // Display game PIN
+        document.getElementById('gamePinDisplay').textContent = gameCode;
+
+        // Wait for socket to connect, then set profile and join game
+        socket.on('connect', () => {
+            console.log('Socket connected, setting profile and joining game');
+            socketConnected = true;
+            socket.emit('set-profile', profile);
+            
+            // Give server time to register profile
+            setTimeout(() => {
+                console.log('Joining game:', gameCode);
+                socket.emit('join-game', gameCode);
+            }, 300);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Socket disconnected!');
+            socketConnected = false;
+        });
+
+        // If already connected, do it immediately
+        if (socket.connected) {
+            socket.emit('set-profile', profile);
+            setTimeout(() => {
+                socket.emit('join-game', gameCode);
+            }, 300);
+        }
+
+        // Calculate circular positions for players
+        function arrangePlayersInCircle(players) {
+            const circle = document.getElementById('playersCircle');
+            circle.innerHTML = '';
+
+            const radius = 140;
+            const centerX = 170;
+            const centerY = 170;
+
+            players.forEach((player, index) => {
+                const angle = (index / players.length) * 2 * Math.PI - Math.PI / 2;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-item';
+                playerDiv.style.left = `${x - 37.5}px`;
+                playerDiv.style.top = `${y - 37.5}px`;
+
+                const isPlayerAdmin = player.id === currentGame?.adminId;
+                const isCurrentUser = player.id === socket.id;
+
+                playerDiv.innerHTML = `
+                    <div style="position: relative;">
+                        <img src="${player.photo}" alt="${player.name}" class="player-avatar ${isCurrentUser ? 'current-user' : ''}">
+                        ${isPlayerAdmin ? '<span class="admin-badge">⭐</span>' : ''}
+                    </div>
+                    <div class="player-name">${player.name}${isCurrentUser ? ' (You)' : ''}</div>
+                `;
+
+                circle.appendChild(playerDiv);
+            });
+        }
+
+        // Listen for game updates
+        socket.on('game-created', (data) => {
+            currentGame = data.game;
+            isAdmin = data.game.adminId === socket.id;
+            console.log('Game created, players:', currentGame.players);
+            updateLobby();
+        });
+
+        socket.on('game-joined', (data) => {
+            currentGame = data.game;
+            isAdmin = data.game.adminId === socket.id;
+            console.log('Game joined, players:', currentGame.players);
+            updateLobby();
+        });
+
+        // Request current game state if page was refreshed
+        setTimeout(() => {
+            if (!currentGame) {
+                console.log('No game state yet, check if already in game');
+            }
+        }, 1000);
+
+        socket.on('player-joined', (data) => {
+            currentGame.players = data.players;
+            updateLobby();
+        });
+
+        socket.on('player-left', (data) => {
+            currentGame.players = data.players;
+            updateLobby();
+        });
+
+        socket.on('new-admin', (data) => {
+            currentGame.adminId = data.adminId;
+            isAdmin = data.adminId === socket.id;
+            updateLobby();
+        });
+
+        function updateLobby() {
+            arrangePlayersInCircle(currentGame.players);
+
+            // Update player count
+            document.getElementById('playerCount').textContent = currentGame.players.length;
+
+            // Show mode selection button for admin if enough players
+            if (isAdmin && currentGame.players.length >= 3) {
+                document.getElementById('selectModeBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('selectModeBtn').classList.add('hidden');
+            }
+        }
+
+        // Mode selection
+        document.getElementById('selectModeBtn').addEventListener('click', () => {
+            document.getElementById('lobbyPage').classList.add('hidden');
+            document.getElementById('modeSelectionPage').classList.remove('hidden');
+        });
+
+        document.getElementById('backToLobby').addEventListener('click', () => {
+            document.getElementById('modeSelectionPage').classList.add('hidden');
+            document.getElementById('lobbyPage').classList.remove('hidden');
+        });
+
+        // Mode card clicks
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', () => {
+                if (!socketConnected) {
+                    alert('Connecting to server... Please try again in a moment.');
+                    return;
+                }
+                if (!isAdmin) {
+                    return; // Only admin can select mode
+                }
+                if (modeSelecting) return; // Prevent double clicks
+                modeSelecting = true;
+                card.style.opacity = '0.5';
+                
+                const mode = card.dataset.mode;
+                socket.emit('select-mode', { gameCode, mode });
+            });
+        });
+
+        // Redirect to game when mode is selected
+        socket.on('wheel-input-start', (data) => {
+            console.log('Wheel mode started:', data);
+            localStorage.setItem('wheelStartData', JSON.stringify(data));
+            window.location.href = '/game.html?mode=wheel';
+        });
+
+        socket.on('game-started', (data) => {
+            console.log('Game started with data:', data);
+            localStorage.setItem('currentMode', data.mode);
+            localStorage.setItem('gameStartData', JSON.stringify(data));
+            window.location.href = '/game.html?mode=' + data.mode;
+        });
+
+        // Leave game
+        document.getElementById('leaveBtn').addEventListener('click', () => {
+            socket.disconnect();
+            localStorage.removeItem('currentGameCode');
+            window.location.href = '/menu.html';
+        });
+
+        socket.on('error', (message) => {
+            console.error('Socket error:', message);
+            // Only show alert if we're not on the initial join
+            if (currentGame) {
+                alert(message);
+            } else {
+                // Retry joining after a delay if game not found on initial join
+                if (message.includes('Game not found')) {
+                    console.log('Game not found, retrying in 1 second...');
+                    setTimeout(() => {
+                        socket.emit('set-profile', profile);
+                        setTimeout(() => {
+                            socket.emit('join-game', gameCode);
+                        }, 200);
+                    }, 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret - Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Game-themed floating emojis -->
+        <div class="sparkle" style="top: 7%; left: 10%;">🔥</div>
+        <div class="sparkle" style="top: 14%; right: 12%; animation-delay: 0.8s;">🌶️</div>
+        <div class="sparkle" style="top: 22%; left: 8%; animation-delay: 1.5s;">😜</div>
+        <div class="sparkle" style="top: 32%; right: 15%; animation-delay: 2.1s;">🎉</div>
+        <div class="sparkle" style="top: 42%; left: 12%; animation-delay: 1.0s;">💋</div>
+        <div class="sparkle" style="top: 52%; right: 10%; animation-delay: 1.7s;">🤫</div>
+        <div class="sparkle" style="top: 62%; left: 15%; animation-delay: 2.4s;">🎭</div>
+        <div class="sparkle" style="top: 72%; right: 8%; animation-delay: 1.3s;">💥</div>
+        <div class="sparkle" style="bottom: 18%; left: 18%; animation-delay: 1.9s;">🔒</div>
+        <div class="sparkle" style="bottom: 28%; right: 20%; animation-delay: 0.6s;">😋</div>
+        <div class="sparkle" style="bottom: 10%; left: 22%; animation-delay: 2.2s;">🎡</div>
+        <div class="sparkle" style="bottom: 5%; right: 25%; animation-delay: 1.1s;">💬</div>
+
+        <div class="close-btn" id="leaveGameBtn">✖</div>
+
+        <!-- Wheel Mode: Input Phase (One at a time) -->
+        <div class="page hidden" id="wheelInputPage">
+            <div class="text-bubble" id="wheelInstructionText">
+                Fill out this prompt anonymously
+            </div>
+
+            <div class="prompt-label" id="wheelPromptLabel">1. 💪 Dare</div>
+            <textarea 
+                class="glass-textarea" 
+                id="wheelCurrentInput" 
+                placeholder="Write a dare for someone..."
+                maxlength="200"
+            ></textarea>
+
+            <button class="glass-btn" id="wheelNextBtn" disabled>
+                Next ➜
+            </button>
+        </div>
+
+        <!-- Waiting for others -->
+        <div class="page hidden" id="waitingPage">
+            <div class="waiting-screen">
+                <div class="waiting-spinner">⏳</div>
+                <div class="waiting-text" id="waitingText">Waiting for everyone else...</div>
+                <div class="waiting-progress" id="waitingProgress">0/0 submitted</div>
+            </div>
+        </div>
+
+        <!-- Wheel Mode: Spinning Phase -->
+        <div class="page hidden" id="wheelSpinPage">
+            <div class="text-bubble" id="wheelStatusText">
+                Time to spin the wheel!
+            </div>
+
+            <div class="wheel-container">
+                <div class="wheel-pointer">▼</div>
+                <div class="wheel" id="wheel">
+                    <svg width="100%" height="100%" viewBox="0 0 400 400">
+                        <defs>
+                            <!-- Gradients for premium look -->
+                            <linearGradient id="dareGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#e94b9b;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#d6287f;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="personalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#6c3aed;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#5221d1;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="gossipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#2d5cf6;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#1a3fd9;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="secretGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#6221d1;stop-opacity:1" />
+                            </linearGradient>
+                            <!-- Shadow filter -->
+                            <filter id="innerShadow">
+                                <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+                                <feOffset dx="0" dy="0" result="offsetblur"/>
+                                <feFlood flood-color="#000000" flood-opacity="0.3"/>
+                                <feComposite in2="offsetblur" operator="in"/>
+                                <feMerge>
+                                    <feMergeNode/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <g transform="translate(200, 200)">
+                            <!-- Dare (Top-Right: 0-90°) -->
+                            <path d="M 0,-170 A 170,170 0 0,1 170,0 L 0,0 Z" fill="url(#dareGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(45)">
+                                <text x="0" y="-85" fill="white" font-size="22" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💪 DARE</text>
+                            </g>
+                            
+                            <!-- Personal (Bottom-Right: 90-180°) -->
+                            <path d="M 170,0 A 170,170 0 0,1 0,170 L 0,0 Z" fill="url(#personalGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(135)">
+                                <text x="0" y="-75" fill="white" font-size="18" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">🔍 Q</text>
+                            </g>
+                            
+                            <!-- Gossip (Bottom-Left: 180-270°) -->
+                            <path d="M 0,170 A 170,170 0 0,1 -170,0 L 0,0 Z" fill="url(#gossipGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(225)">
+                                <text x="0" y="-85" fill="white" font-size="20" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💬 GOSSIP</text>
+                            </g>
+                            
+                            <!-- Secret (Top-Left: 270-360°) -->
+                            <path d="M -170,0 A 170,170 0 0,1 0,-170 L 0,0 Z" fill="url(#secretGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(315)">
+                                <text x="0" y="-85" fill="white" font-size="20" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">🤫 SECRET</text>
+                            </g>
+                            
+                            <!-- Center circle -->
+                            <circle cx="0" cy="0" r="50" fill="#1a1a2e" stroke="#6c3aed" stroke-width="3"/>
+                            <circle cx="0" cy="0" r="45" fill="url(#dareGrad)"/>
+                            <text x="0" y="8" fill="white" font-size="18" font-weight="900" text-anchor="middle" font-family="Poppins">SPIN</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <button class="glass-btn hidden" id="spinWheelBtn">
+                🎡 Spin the Wheel
+            </button>
+
+            <div class="text-bubble hidden" id="wheelResult" style="background: white; color: #333; margin-top: 20px;">
+                <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;" id="resultType"></div>
+                <div style="font-size: 1.2rem;" id="resultContent"></div>
+            </div>
+
+            <button class="glass-btn hidden" id="nextSpinBtn">
+                Spin Again
+            </button>
+        </div>
+
+        <!-- Question Mode: Question Display -->
+        <div class="page hidden" id="questionPage">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 1.2rem; opacity: 0.9;" id="questionCounter">Question 1/20</div>
+            </div>
+
+            <div class="question-display" id="questionText">
+                Who would do this?
+            </div>
+
+            <!-- Two player options to vote for -->
+            <div class="player-vote-options">
+                <div class="player-vote-card" id="playerOption1">
+                    <img class="player-vote-avatar" id="playerAvatar1" alt="Player 1">
+                    <div class="player-vote-name" id="playerName1">Player 1</div>
+                </div>
+                
+                <div class="vs-text">VS</div>
+
+                <div class="player-vote-card" id="playerOption2">
+                    <img class="player-vote-avatar" id="playerAvatar2" alt="Player 2">
+                    <div class="player-vote-name" id="playerName2">Player 2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vote Confirmation -->
+        <div class="page hidden" id="confirmationPage">
+            <div class="vote-confirmation">
+                <div class="confirmation-emoji">🤐</div>
+                <div class="confirmation-text">Your vote is secret this time!</div>
+                <div class="confirmation-subtext">
+                    No one knows what you picked... but the next question might reveal who voted!
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Page -->
+        <div class="page hidden" id="resultsPage">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div class="anonymous-badge hidden" id="anonymousBadgeResults">
+                    🔒 This vote was anonymous
+                </div>
+            </div>
+            <div class="poll-results">
+                <div class="player-vote-results">
+                    <div class="result-player-card">
+                        <img class="result-avatar" id="resultAvatar1" alt="Player 1">
+                        <div class="result-name" id="resultName1">Player 1</div>
+                        <div class="result-percentage" id="resultPercent1">0%</div>
+                        <div class="result-count" id="resultCount1">0 votes</div>
+                    </div>
+
+                    <div class="result-player-card">
+                        <img class="result-avatar" id="resultAvatar2" alt="Player 2">
+                        <div class="result-name" id="resultName2">Player 2</div>
+                        <div class="result-percentage" id="resultPercent2">0%</div>
+                        <div class="result-count" id="resultCount2">0 votes</div>
+                    </div>
+                </div>
+
+                <div class="vote-details hidden" id="voteDetails">
+                    <div class="vote-category">
+                        <div class="vote-category-title">Voted for <span id="votedForName1"></span></div>
+                        <div class="voter-grid" id="voters1"></div>
+                    </div>
+
+                    <div class="vote-category">
+                        <div class="vote-category-title">Voted for <span id="votedForName2"></span></div>
+                        <div class="voter-grid" id="voters2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="glass-btn hidden" id="nextQuestionBtn">
+                Next Question ➜
+            </button>
+        </div>
+
+        <!-- Spicy Special: Who do you like? -->
+        <div class="page hidden" id="crushPage">
+            <div class="text-bubble">
+                Who do you like more in this party? (100% Anonymous)
+            </div>
+
+            <div class="voter-grid" id="crushOptions" style="margin: 30px 0;">
+                <!-- Player options will be added here -->
+            </div>
+
+            <button class="glass-btn" id="submitCrushBtn" disabled>
+                Submit (Anonymous)
+            </button>
+        </div>
+
+        <!-- Game Finished -->
+        <div class="page hidden" id="finishedPage">
+            <div class="text-bubble" style="font-size: 2rem;">
+                🎉 Game Finished!
+            </div>
+
+            <button class="glass-btn" id="backToMenuBtn">
+                Back to Menu
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const gameCode = localStorage.getItem('currentGameCode');
+        const profile = JSON.parse(localStorage.getItem('secretProfile'));
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+
+        if (!gameCode || !profile) {
+            window.location.href = '/';
+        }
+
+        socket.emit('set-profile', profile);
+        
+        // Join the game room
+        socket.emit('join-game', { gameCode, player: profile });
+
+        let isAdmin = false;
+        let currentGame = null;
+        let hasVoted = false;
+        let selectedCrush = null;
+        let currentPlayers = [];
+        let isAnonymousVote = false;
+
+        // Sound Effects using Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTickSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.05);
+        }
+
+        function playDrumRoll() {
+            const duration = 2;
+            const interval = 0.05;
+            let time = 0;
+            
+            const rollInterval = setInterval(() => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 100 + Math.random() * 50;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+                
+                time += interval;
+                if (time >= duration) {
+                    clearInterval(rollInterval);
+                }
+            }, interval * 1000);
+        }
+
+        function playSuccessSound() {
+            // Play ascending notes for success
+            const frequencies = [523.25, 659.25, 783.99];
+            frequencies.forEach((freq, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = freq;
+                oscillator.type = 'sine';
+                
+                const startTime = audioContext.currentTime + (index * 0.1);
+                gainNode.gain.setValueAtTime(0.3, startTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+                
+                oscillator.start(startTime);
+                oscillator.stop(startTime + 0.3);
+            });
+        }
+
+        // We'll load game start data after socket listeners are set up
+
+        // Initialize based on mode
+        if (mode === 'wheel') {
+            document.getElementById('wheelInputPage').classList.remove('hidden');
+            
+            let wheelStep = 0;
+            const wheelSubmissions = [];
+            const wheelPrompts = [
+                { emoji: '💪', title: 'Dare', placeholder: 'Write a dare for someone...', type: 'dare' },
+                { emoji: '🔍', title: 'Personal Question', placeholder: 'Ask a personal question about someone...', type: 'personal' },
+                { emoji: '💬', title: 'Gossip', placeholder: 'Share some recent gossip...', type: 'gossip' },
+                { emoji: '🤫', title: 'Secret', placeholder: 'What\'s the deepest secret you know about someone?', type: 'secret' }
+            ];
+
+            function showWheelPrompt() {
+                const prompt = wheelPrompts[wheelStep];
+                document.getElementById('wheelPromptLabel').textContent = `${wheelStep + 1}. ${prompt.emoji} ${prompt.title}`;
+                document.getElementById('wheelCurrentInput').placeholder = prompt.placeholder;
+                document.getElementById('wheelCurrentInput').value = '';
+                document.getElementById('wheelNextBtn').disabled = true;
+                
+                if (wheelStep === wheelPrompts.length - 1) {
+                    document.getElementById('wheelNextBtn').textContent = 'Submit ✓';
+                }
+            }
+
+            // Enable next button when input filled
+            document.getElementById('wheelCurrentInput').addEventListener('input', (e) => {
+                document.getElementById('wheelNextBtn').disabled = e.target.value.trim().length === 0;
+            });
+
+            // Next button click
+            document.getElementById('wheelNextBtn').addEventListener('click', () => {
+                const content = document.getElementById('wheelCurrentInput').value.trim();
+                const prompt = wheelPrompts[wheelStep];
+                
+                wheelSubmissions.push({
+                    type: prompt.type,
+                    content: content
+                });
+
+                wheelStep++;
+
+                if (wheelStep < wheelPrompts.length) {
+                    // Show next prompt
+                    showWheelPrompt();
+                } else {
+                    // All done, submit
+                    socket.emit('submit-wheel-inputs', { gameCode, submissions: wheelSubmissions });
+                    
+                    document.getElementById('wheelInputPage').classList.add('hidden');
+                    document.getElementById('waitingPage').classList.remove('hidden');
+                }
+            });
+
+            // Show first prompt
+            showWheelPrompt();
+        } else {
+            document.getElementById('questionPage').classList.remove('hidden');
+        }
+
+        // Wheel submission status
+        socket.on('wheel-submission-status', (data) => {
+            document.getElementById('waitingProgress').textContent = 
+                `${data.submitted}/${data.total} submitted`;
+        });
+
+        // Wheel ready
+        socket.on('wheel-ready', () => {
+            document.getElementById('waitingPage').classList.add('hidden');
+            document.getElementById('wheelSpinPage').classList.remove('hidden');
+            
+            // Admin can spin
+            if (isAdmin) {
+                document.getElementById('spinWheelBtn').classList.remove('hidden');
+            }
+        });
+
+        // Function to animate wheel spin (used by all players)
+        function animateWheelSpin(rotation) {
+            document.getElementById('spinWheelBtn').classList.add('hidden');
+            document.getElementById('wheelStatusText').textContent = '🎡 Spinning...';
+            
+            // Spin animation with exact rotation from server
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = `rotate(${rotation}deg)`;
+            
+            // Play ticking sounds during spin (4 seconds)
+            let tickCount = 0;
+            const maxTicks = 40;
+            const tickInterval = setInterval(() => {
+                playTickSound();
+                tickCount++;
+                if (tickCount >= maxTicks) {
+                    clearInterval(tickInterval);
+                }
+            }, 100);
+        }
+        
+        // Spin wheel button (admin only triggers server event)
+        document.getElementById('spinWheelBtn').addEventListener('click', () => {
+            socket.emit('spin-wheel', { gameCode });
+        });
+
+        // Listen for wheel spinning event (ALL players see this)
+        socket.on('wheel-spinning', (data) => {
+            animateWheelSpin(data.rotation);
+        });
+
+        // Wheel result
+        socket.on('wheel-result', (data) => {
+            // Play drum roll after wheel stops (at 3.5 seconds)
+            setTimeout(() => {
+                document.getElementById('wheelStatusText').textContent = '🥁 Drum roll...';
+                playDrumRoll();
+            }, 3500);
+            
+            // Show result after drum roll (at 6 seconds total)
+            setTimeout(() => {
+                const typeEmojis = {
+                    dare: '💪',
+                    personal: '🔍',
+                    gossip: '💬',
+                    secret: '🤫'
+                };
+
+                const typeNames = {
+                    dare: 'Dare',
+                    personal: 'Personal Question',
+                    gossip: 'Gossip',
+                    secret: 'Secret'
+                };
+
+                // Play success sound
+                playSuccessSound();
+                
+                document.getElementById('wheelStatusText').textContent = '🎉 Result!';
+                document.getElementById('resultType').textContent = 
+                    `${typeEmojis[data.type]} ${typeNames[data.type]}`;
+                document.getElementById('resultContent').textContent = data.content;
+                document.getElementById('wheelResult').classList.remove('hidden');
+                
+                if (isAdmin && data.remaining > 0) {
+                    document.getElementById('nextSpinBtn').classList.remove('hidden');
+                } else if (data.remaining === 0) {
+                    setTimeout(() => {
+                        document.getElementById('wheelSpinPage').classList.add('hidden');
+                        document.getElementById('finishedPage').classList.remove('hidden');
+                    }, 5000);
+                }
+            }, 6000);
+        });
+
+        // Function to reset wheel (used by all players)
+        function resetWheel() {
+            document.getElementById('wheelResult').classList.add('hidden');
+            document.getElementById('nextSpinBtn').classList.add('hidden');
+            document.getElementById('wheelStatusText').textContent = 'Time to spin the wheel!';
+            
+            // Reset wheel rotation
+            const wheel = document.getElementById('wheel');
+            wheel.style.transition = 'none';
+            wheel.style.transform = 'rotate(0deg)';
+            setTimeout(() => {
+                wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+            }, 50);
+            
+            if (isAdmin) {
+                document.getElementById('spinWheelBtn').classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('nextSpinBtn').addEventListener('click', () => {
+            // Admin broadcasts reset to everyone
+            socket.emit('reset-wheel', { gameCode });
+        });
+
+        // All players listen for wheel reset
+        socket.on('wheel-reset', () => {
+            resetWheel();
+        });
+
+        // Question mode: Game started
+        socket.on('game-started', (data) => {
+            displayQuestion(data);
+            document.getElementById('questionPage').classList.remove('hidden');
+        });
+
+        socket.on('next-question', (data) => {
+            hasVoted = false;
+            // Hide all other pages
+            document.getElementById('resultsPage').classList.add('hidden');
+            document.getElementById('waitingPage').classList.add('hidden');
+            document.getElementById('confirmationPage').classList.add('hidden');
+            // Show question page
+            document.getElementById('questionPage').classList.remove('hidden');
+            displayQuestion(data);
+        });
+
+        // Vote progress updates
+        socket.on('vote-progress', (data) => {
+            console.log('Vote progress received:', data);
+            document.getElementById('waitingProgress').textContent = 
+                `${data.voted}/${data.total} voted`;
+            
+            // Play a subtle tick sound for each vote
+            playTickSound();
+        });
+
+        // Handle game join response
+        socket.on('game-joined', (data) => {
+            console.log('Joined game successfully:', data);
+            currentGame = data.game;
+            isAdmin = data.game.adminId === socket.id;
+        });
+
+        // Load game start data from localStorage after listeners are set up
+        const gameStartData = localStorage.getItem('gameStartData');
+        if (gameStartData && mode !== 'wheel') {
+            const data = JSON.parse(gameStartData);
+            console.log('Loading game start data from localStorage:', data);
+            localStorage.removeItem('gameStartData'); // Clear it after using
+            
+            // Display the first question immediately
+            setTimeout(() => {
+                displayQuestion(data);
+                document.getElementById('questionPage').classList.remove('hidden');
+            }, 100);
+        }
+
+        // Error handling
+        socket.on('error', (message) => {
+            console.error('Socket error:', message);
+            alert(message);
+        });
+
+        function displayQuestion(data) {
+            console.log('Display question data:', data);
+            console.log('Players:', data.players);
+            
+            currentPlayers = data.players;
+            isAnonymousVote = data.isAnonymous;  // Store for results screen
+            
+            document.getElementById('questionCounter').textContent = 
+                `Question ${data.questionNumber}/${data.totalQuestions}`;
+            
+            document.getElementById('questionText').textContent = data.question;
+
+            // Display two players
+            if (data.players && data.players[0] && data.players[1]) {
+                document.getElementById('playerAvatar1').src = data.players[0].photo || '';
+                document.getElementById('playerName1').textContent = data.players[0].name || 'Player 1';
+                
+                document.getElementById('playerAvatar2').src = data.players[1].photo || '';
+                document.getElementById('playerName2').textContent = data.players[1].name || 'Player 2';
+                
+                console.log('Player 1:', data.players[0].name, data.players[0].photo);
+                console.log('Player 2:', data.players[1].name, data.players[1].photo);
+            } else {
+                console.error('Players data is missing!', data);
+            }
+        }
+
+        // Vote for player cards
+        document.getElementById('playerOption1').addEventListener('click', () => {
+            if (!hasVoted && currentPlayers[0]) {
+                vote(currentPlayers[0].id);
+            }
+        });
+
+        document.getElementById('playerOption2').addEventListener('click', () => {
+            if (!hasVoted && currentPlayers[1]) {
+                vote(currentPlayers[1].id);
+            }
+        });
+
+        function vote(playerId) {
+            if (hasVoted) return;
+            hasVoted = true;
+
+            // Play a quick confirmation sound
+            playTickSound();
+            
+            socket.emit('submit-vote', { gameCode, vote: playerId });
+            
+            // Show confirmation
+            document.getElementById('questionPage').classList.add('hidden');
+            document.getElementById('confirmationPage').classList.remove('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('confirmationPage').classList.add('hidden');
+                document.getElementById('waitingPage').classList.remove('hidden');
+                document.getElementById('waitingText').textContent = 'Waiting for everyone else...';
+                // The vote-progress event from server will update the counter
+            }, 3000);
+        }
+
+        // Vote results
+        socket.on('vote-results', (data) => {
+            // Hide waiting page and text
+            document.getElementById('waitingPage').classList.add('hidden');
+            document.getElementById('waitingText').textContent = 'Waiting for everyone else...'; // Reset for next time
+            
+            // Show results
+            document.getElementById('resultsPage').classList.remove('hidden');
+
+            // Play success sound
+            playSuccessSound();
+
+            // Show anonymous badge if this vote was anonymous
+            if (isAnonymousVote) {
+                document.getElementById('anonymousBadgeResults').classList.remove('hidden');
+            } else {
+                document.getElementById('anonymousBadgeResults').classList.add('hidden');
+            }
+
+            // Display results for both players
+            const player1 = currentPlayers[0];
+            const player2 = currentPlayers[1];
+            
+            const count1 = data.voteCounts[player1.id] || 0;
+            const count2 = data.voteCounts[player2.id] || 0;
+            
+            const percent1 = data.totalVotes > 0 ? Math.round((count1 / data.totalVotes) * 100) : 0;
+            const percent2 = data.totalVotes > 0 ? Math.round((count2 / data.totalVotes) * 100) : 0;
+
+            document.getElementById('resultAvatar1').src = player1.photo;
+            document.getElementById('resultName1').textContent = player1.name;
+            document.getElementById('resultPercent1').textContent = percent1 + '%';
+            document.getElementById('resultCount1').textContent = count1 + ' vote' + (count1 !== 1 ? 's' : '');
+
+            document.getElementById('resultAvatar2').src = player2.photo;
+            document.getElementById('resultName2').textContent = player2.name;
+            document.getElementById('resultPercent2').textContent = percent2 + '%';
+            document.getElementById('resultCount2').textContent = count2 + ' vote' + (count2 !== 1 ? 's' : '');
+
+            // Show vote details if not anonymous
+            if (!data.isAnonymous && Object.keys(data.voteDetails).length > 0) {
+                document.getElementById('voteDetails').classList.remove('hidden');
+                
+                document.getElementById('votedForName1').textContent = player1.name;
+                document.getElementById('votedForName2').textContent = player2.name;
+
+                const voters1 = data.voteDetails[player1.id] || [];
+                const voters2 = data.voteDetails[player2.id] || [];
+
+                document.getElementById('voters1').innerHTML = voters1.map(v => `
+                    <div class="voter-item">
+                        <img src="${v.playerPhoto}" alt="${v.playerName}" class="voter-avatar">
+                        <div class="voter-name">${v.playerName}</div>
+                    </div>
+                `).join('') || '<div style="opacity: 0.7;">No votes</div>';
+
+                document.getElementById('voters2').innerHTML = voters2.map(v => `
+                    <div class="voter-item">
+                        <img src="${v.playerPhoto}" alt="${v.playerName}" class="voter-avatar">
+                        <div class="voter-name">${v.playerName}</div>
+                    </div>
+                `).join('') || '<div style="opacity: 0.7;">No votes</div>';
+            } else {
+                document.getElementById('voteDetails').classList.add('hidden');
+            }
+
+            if (isAdmin) {
+                document.getElementById('nextQuestionBtn').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+            socket.emit('next-question', { gameCode });
+            document.getElementById('nextQuestionBtn').classList.add('hidden');
+        });
+
+        // Game finished
+        socket.on('game-finished', () => {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById('finishedPage').classList.remove('hidden');
+        });
+
+        document.getElementById('backToMenuBtn').addEventListener('click', () => {
+            localStorage.removeItem('currentGameCode');
+            window.location.href = '/menu.html';
+        });
+
+        // Leave game
+        document.getElementById('leaveGameBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to leave the game?')) {
+                socket.disconnect();
+                localStorage.removeItem('currentGameCode');
+                window.location.href = '/menu.html';
+            }
+        });
+
+        // Listen for admin status
+        socket.on('game-created', (data) => {
+            isAdmin = data.game.adminId === socket.id;
+        });
+
+        socket.on('game-joined', (data) => {
+            isAdmin = data.game.adminId === socket.id;
+        });
+
+        socket.on('new-admin', (data) => {
+            isAdmin = data.adminId === socket.id;
+        });
+    </script>
+</body>
+</html>

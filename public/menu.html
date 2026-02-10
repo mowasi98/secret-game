@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret - Main Menu</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Game-themed floating emojis -->
+        <div class="sparkle" style="top: 10%; left: 8%;">🔥</div>
+        <div class="sparkle" style="top: 18%; right: 12%; animation-delay: 0.8s;">🌶️</div>
+        <div class="sparkle" style="top: 28%; left: 15%; animation-delay: 1.5s;">😜</div>
+        <div class="sparkle" style="top: 40%; right: 10%; animation-delay: 2.2s;">🎉</div>
+        <div class="sparkle" style="top: 52%; left: 12%; animation-delay: 1.1s;">🤫</div>
+        <div class="sparkle" style="top: 64%; right: 8%; animation-delay: 1.9s;">💋</div>
+        <div class="sparkle" style="bottom: 25%; left: 10%; animation-delay: 0.6s;">🎭</div>
+        <div class="sparkle" style="bottom: 15%; right: 15%; animation-delay: 2.4s;">💥</div>
+        <div class="sparkle" style="bottom: 35%; left: 18%; animation-delay: 1.3s;">🔒</div>
+        <div class="sparkle" style="bottom: 8%; right: 20%; animation-delay: 0.9s;">😋</div>
+
+        <div class="page">
+            <!-- Text bubble -->
+            <div class="text-bubble">
+                Got a game code? Join your friends. Or start your own party!
+            </div>
+
+            <!-- Profile display (centered, clickable to edit) -->
+            <div class="profile-display">
+                <div style="position: relative; display: inline-block;">
+                    <img id="userPhoto" class="profile-pic-small clickable" alt="Profile" title="Click to edit profile">
+                    <div class="edit-badge">✏️</div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <button class="glass-btn" id="joinGameBtn">
+                Join a game
+            </button>
+
+            <button class="glass-btn" id="createGameBtn">
+                Create a party
+            </button>
+
+            <button class="glass-btn logout-btn" id="logoutBtn">
+                🚪 Logout
+            </button>
+        </div>
+
+        <!-- Join game modal -->
+        <div class="page hidden" id="joinModal">
+            <div class="close-btn" id="closeJoinModal">✖</div>
+            
+            <div class="text-bubble">
+                Enter the game PIN
+            </div>
+
+            <input 
+                type="text" 
+                class="glass-input" 
+                id="gamePinInput" 
+                placeholder="Game PIN" 
+                maxlength="6"
+                pattern="[0-9]*"
+                inputmode="numeric"
+            >
+
+            <button class="glass-btn" id="joinBtn">
+                Join Game
+            </button>
+
+            <div id="joinError" class="text-bubble" style="display: none; background: #ff6b6b;">
+                <span id="joinErrorText"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Load profile
+        const profile = JSON.parse(localStorage.getItem('secretProfile'));
+        if (!profile) {
+            window.location.href = '/';
+        }
+
+        document.getElementById('userPhoto').src = profile.photo;
+
+        // Track socket connection
+        let socketConnected = false;
+        socket.on('connect', () => {
+            console.log('Socket connected!');
+            socketConnected = true;
+            socket.emit('set-profile', profile);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Socket disconnected!');
+            socketConnected = false;
+        });
+
+        // Click profile to edit
+        document.getElementById('userPhoto').addEventListener('click', () => {
+            // Redirect back to profile setup to edit
+            window.location.href = '/';
+        });
+
+        // Create game
+        let isCreatingGame = false;
+        document.getElementById('createGameBtn').addEventListener('click', () => {
+            if (!socketConnected) {
+                alert('Connecting to server... Please try again in a moment.');
+                return;
+            }
+            if (isCreatingGame) return; // Prevent double clicks
+            isCreatingGame = true;
+            document.getElementById('createGameBtn').style.opacity = '0.5';
+            socket.emit('create-game');
+        });
+
+        socket.on('game-created', (data) => {
+            // Store game code
+            localStorage.setItem('currentGameCode', data.gameCode);
+            // Redirect to lobby
+            window.location.href = '/lobby.html';
+        });
+
+        socket.on('error', (msg) => {
+            alert(msg);
+            isCreatingGame = false;
+            document.getElementById('createGameBtn').style.opacity = '1';
+        });
+
+        // Join game
+        document.getElementById('joinGameBtn').addEventListener('click', () => {
+            if (!socketConnected) {
+                alert('Connecting to server... Please try again in a moment.');
+                return;
+            }
+            document.querySelector('.page:not(.hidden)').classList.add('hidden');
+            document.getElementById('joinModal').classList.remove('hidden');
+        });
+
+        document.getElementById('closeJoinModal').addEventListener('click', () => {
+            document.getElementById('joinModal').classList.add('hidden');
+            document.querySelector('.page').classList.remove('hidden');
+        });
+
+        document.getElementById('joinBtn').addEventListener('click', () => {
+            if (!socketConnected) {
+                alert('Connecting to server... Please try again in a moment.');
+                return;
+            }
+            const pin = document.getElementById('gamePinInput').value.trim();
+            if (pin.length === 6) {
+                console.log('Attempting to join game with PIN:', pin);
+                document.getElementById('joinBtn').style.opacity = '0.5';
+                // Make sure profile is set first
+                socket.emit('set-profile', profile);
+                // Small delay to ensure profile is registered
+                setTimeout(() => {
+                    socket.emit('join-game', pin);
+                }, 100);
+            } else {
+                alert('Please enter a valid 6-digit PIN');
+            }
+        });
+
+        // Allow Enter key to join
+        document.getElementById('gamePinInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('joinBtn').click();
+            }
+        });
+
+        socket.on('game-joined', (data) => {
+            localStorage.setItem('currentGameCode', data.game.code);
+            window.location.href = '/lobby.html';
+        });
+
+        socket.on('error', (message) => {
+            document.getElementById('joinError').style.display = 'block';
+            document.getElementById('joinErrorText').textContent = message;
+            
+            setTimeout(() => {
+                document.getElementById('joinError').style.display = 'none';
+            }, 3000);
+        });
+
+        // Logout button
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear profile from localStorage
+                localStorage.removeItem('secretProfile');
+                // Disconnect socket
+                socket.disconnect();
+                // Redirect to profile setup
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>
