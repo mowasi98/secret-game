@@ -161,6 +161,9 @@ io.on('connection', (socket) => {
             gender: data.gender
         });
         console.log('Profile set:', data.name);
+        
+        // Send confirmation back to client
+        socket.emit('profile-confirmed', { success: true, socketId: socket.id });
     });
 
     // Create game

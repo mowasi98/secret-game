@@ -21,6 +21,11 @@
         <div class="sparkle" style="bottom: 8%; right: 20%; animation-delay: 0.9s;">😋</div>
 
         <div class="page">
+            <!-- Connection Status -->
+            <div id="connectionStatus" style="position: fixed; top: 10px; right: 10px; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; z-index: 1000; background: rgba(255,193,7,0.3); backdrop-filter: blur(10px); border: 1px solid rgba(255,193,7,0.5);">
+                🔄 Connecting...
+            </div>
+
             <!-- Text bubble -->
             <div class="text-bubble">
                 Got a game code? Join your friends. Or start your own party!
@@ -100,15 +105,30 @@
 
         // Track socket connection
         let socketConnected = false;
+        let profileConfirmed = false;
+        const statusEl = document.getElementById('connectionStatus');
+        
         socket.on('connect', () => {
-            console.log('Socket connected!');
+            console.log('✅ Socket connected!', socket.id);
             socketConnected = true;
+            statusEl.style.background = 'rgba(76,175,80,0.3)';
+            statusEl.style.borderColor = 'rgba(76,175,80,0.5)';
+            statusEl.textContent = '✅ Connected';
             socket.emit('set-profile', profile);
         });
 
+        socket.on('profile-confirmed', (data) => {
+            console.log('✅ Profile confirmed!', data);
+            profileConfirmed = true;
+        });
+
         socket.on('disconnect', () => {
-            console.log('Socket disconnected!');
+            console.log('❌ Socket disconnected!');
             socketConnected = false;
+            profileConfirmed = false;
+            statusEl.style.background = 'rgba(244,67,54,0.3)';
+            statusEl.style.borderColor = 'rgba(244,67,54,0.5)';
+            statusEl.textContent = '❌ Disconnected';
         });
 
         // Click profile to edit
