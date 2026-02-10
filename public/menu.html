@@ -94,14 +94,21 @@
             reconnectionAttempts: 10,
             timeout: 20000,
             upgrade: !isMobile, // Don't try to upgrade to websocket on mobile
-            forceNew: true
+            forceNew: true,
+            path: '/socket.io/'
         });
 
         console.log('🔍 Device:', isMobile ? 'MOBILE' : 'DESKTOP');
         console.log('🔌 Transports:', socket.io.opts.transports);
+        console.log('🌐 Connecting to:', window.location.origin);
 
         socket.on('connect_error', (error) => {
             console.error('❌ Connection error:', error);
+            console.error('Error details:', error.message, error.type, error.description);
+        });
+
+        socket.on('connect_timeout', () => {
+            console.error('⏱️ Connection timeout!');
         });
 
         // Load profile

@@ -11,14 +11,19 @@ const io = socketIo(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"],
-        credentials: true
+        credentials: true,
+        allowedHeaders: ["*"]
     },
-    transports: ['polling', 'websocket'], // Try polling first for Render
+    transports: ['polling', 'websocket'],
     pingTimeout: 60000,
     pingInterval: 25000,
     allowEIO3: true,
-    connectTimeout: 45000
+    connectTimeout: 45000,
+    path: '/socket.io/'
 });
+
+// Log when Socket.io server is ready
+console.log('✅ Socket.io server configured');
 
 const PORT = process.env.PORT || 3000;
 
