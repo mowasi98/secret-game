@@ -248,7 +248,12 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
+        const socket = io({
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 5
+        });
         const gameCode = localStorage.getItem('currentGameCode');
         const profile = JSON.parse(localStorage.getItem('secretProfile'));
         const urlParams = new URLSearchParams(window.location.search);
