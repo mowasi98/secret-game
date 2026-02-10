@@ -213,6 +213,12 @@ io.on('connection', (socket) => {
             return;
         }
 
+        // Clear disconnection flag if player is reconnecting
+        if (player.disconnectedAt) {
+            delete player.disconnectedAt;
+            console.log(`Player ${player.name} reconnected successfully`);
+        }
+
         // Check if this is the admin rejoining (same name/photo as original admin)
         if (game.adminProfile && 
             game.adminProfile.name === player.name && 
@@ -522,38 +528,48 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('Player disconnected:', socket.id);
         
-        // Don't immediately remove player from games - give them 30 seconds to reconnect
+        // Mark player as disconnected but keep their data for reconnection
+        const playerData = players.get(socket.id);
+        if (playerData) {
+            playerData.disconnectedAt = Date.now();
+            console.log(`Player ${playerData.name} marked as disconnected`);
+        }
+        
+        // Give players 5 MINUTES to reconnect (especially important for mobile/unstable connections)
         setTimeout(() => {
-            // Check if player reconnected
-            if (!players.has(socket.id)) {
+            const player = players.get(socket.id);
+            
+            // Only clean up if player never reconnected
+            if (player && player.disconnectedAt) {
+                console.log(`Cleaning up player ${socket.id} after 5 min timeout`);
+                
                 // Remove player from games
                 for (const [gameCode, game] of games.entries()) {
                     const playerIndex = game.players.findIndex(p => p.id === socket.id);
                     
                     if (playerIndex !== -1) {
-                        const player = game.players[playerIndex];
                         game.players.splice(playerIndex, 1);
                         
-                        // If admin left, assign new admin
-                        if (game.adminId === socket.id && game.players.length > 0) {
-                            game.adminId = game.players[0].id;
-                            io.to(gameCode).emit('new-admin', { adminId: game.adminId });
+                        // If admin left, try to find them by profile
+                        if (game.adminId === socket.id) {
+                            // Keep the game alive, just mark admin as disconnected
+                            console.log(`Admin disconnected from game ${gameCode}, keeping game alive`);
                         }
                         
                         io.to(gameCode).emit('player-left', { playerId: socket.id, players: game.players });
                         
-                        // Delete game if empty or if game is older than 1 hour
+                        // Only delete game if empty AND it's been 5+ minutes
                         if (game.players.length === 0) {
-                            console.log(`Deleting empty game: ${gameCode}`);
+                            console.log(`Deleting empty game after timeout: ${gameCode}`);
                             games.delete(gameCode);
                         }
                     }
                 }
+                
+                // Remove from players map
+                players.delete(socket.id);
             }
-        }, 30000); // 30 second grace period
-        
-        // Always remove from players map on disconnect
-        players.delete(socket.id);
+        }, 300000); // 5 MINUTE grace period (300000ms)
     });
 });
 
