@@ -10,11 +10,14 @@ const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST"],
+        credentials: true
     },
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'], // Try polling first for Render
     pingTimeout: 60000,
-    pingInterval: 25000
+    pingInterval: 25000,
+    allowEIO3: true,
+    connectTimeout: 45000
 });
 
 const PORT = process.env.PORT || 3000;
@@ -22,6 +25,11 @@ const PORT = process.env.PORT || 3000;
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
+
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', socketConnections: io.engine.clientsCount });
+});
 
 // Game state storage
 const games = new Map(); // gameCode -> game data

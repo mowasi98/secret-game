@@ -249,10 +249,15 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io({
-            transports: ['websocket', 'polling'],
+            transports: ['polling', 'websocket'],
             reconnection: true,
             reconnectionDelay: 1000,
-            reconnectionAttempts: 5
+            reconnectionAttempts: 10,
+            timeout: 20000
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('❌ Connection error:', error);
         });
         const gameCode = localStorage.getItem('currentGameCode');
         const profile = JSON.parse(localStorage.getItem('secretProfile'));
