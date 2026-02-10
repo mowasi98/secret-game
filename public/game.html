@@ -248,13 +248,22 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // Detect if mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        // Force polling for mobile (more reliable)
         const socket = io({
-            transports: ['polling', 'websocket'],
+            transports: isMobile ? ['polling'] : ['polling', 'websocket'],
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionAttempts: 10,
-            timeout: 20000
+            timeout: 20000,
+            upgrade: !isMobile, // Don't try to upgrade to websocket on mobile
+            forceNew: true
         });
+
+        console.log('🔍 Device:', isMobile ? 'MOBILE' : 'DESKTOP');
+        console.log('🔌 Transports:', socket.io.opts.transports);
 
         socket.on('connect_error', (error) => {
             console.error('❌ Connection error:', error);
