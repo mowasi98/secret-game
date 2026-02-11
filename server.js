@@ -600,6 +600,215 @@ const questionBanks = {
         "Who is more likely to laugh at inappropriate times?",
         "Who would accidentally call someone while their phone is in their pocket?",
         "Who has more random bookmarks saved?"
+    ],
+    family: [
+        // Silly/Fun Questions (60)
+        "Who would survive longest on a deserted island?",
+        "Who tells the funniest jokes?",
+        "Who would win in a dance battle?",
+        "Who's more likely to become famous?",
+        "Who would make a better superhero?",
+        "Who's the better singer?",
+        "Who would win in a staring contest?",
+        "Who's more likely to win a game show?",
+        "Who has the best laugh?",
+        "Who would be the best comedian?",
+        "Who's more likely to go viral on social media?",
+        "Who would win at hide and seek?",
+        "Who's better at making people smile?",
+        "Who would be funnier in a sitcom?",
+        "Who's more likely to pull off a magic trick?",
+        "Who would win at karaoke?",
+        "Who's the better dancer?",
+        "Who would win in a video game tournament?",
+        "Who's more likely to win a talent show?",
+        "Who has better dance moves?",
+        "Who would be better at stand-up comedy?",
+        "Who's more likely to become a YouTube star?",
+        "Who would win at charades?",
+        "Who's better at telling stories?",
+        "Who would make a better cartoon character?",
+        "Who's more likely to win at trivia night?",
+        "Who has the best sense of humor?",
+        "Who would be better in a musical?",
+        "Who's more likely to make everyone laugh?",
+        "Who would win a lip sync battle?",
+        "Who's better at impressions?",
+        "Who would be more fun at a party?",
+        "Who's more likely to win a costume contest?",
+        "Who has the cooler nickname?",
+        "Who would be better at voice acting?",
+        "Who's more likely to start a TikTok trend?",
+        "Who would win at board games?",
+        "Who's better at making funny faces?",
+        "Who would be a better circus performer?",
+        "Who's more likely to become a meme?",
+        "Who has better jokes?",
+        "Who would win at arm wrestling?",
+        "Who's more likely to win American Idol?",
+        "Who would be better in a comedy movie?",
+        "Who's got better dance energy?",
+        "Who would win at dodgeball?",
+        "Who's more likely to go on a game show?",
+        "Who has the better smile?",
+        "Who would be better at pranks?",
+        "Who's more likely to win at mini golf?",
+        "Who would be the class clown?",
+        "Who's better at beatboxing?",
+        "Who would win at rock-paper-scissors?",
+        "Who's more likely to become a rapper?",
+        "Who has the better victory dance?",
+        "Who would be better at improv comedy?",
+        "Who's more likely to win The Amazing Race?",
+        "Who has the funnier laugh?",
+        "Who would win at air hockey?",
+        "Who's more likely to become a game streamer?",
+        
+        // Skills/Talents Questions (50)
+        "Who's a better cook?",
+        "Who's smarter?",
+        "Who's more athletic?",
+        "Who's better at video games?",
+        "Who's more artistic?",
+        "Who's better at math?",
+        "Who's a better driver?",
+        "Who's more tech-savvy?",
+        "Who's better at sports?",
+        "Who's a better musician?",
+        "Who's better at drawing?",
+        "Who has better handwriting?",
+        "Who's better at baking?",
+        "Who's more organized?",
+        "Who's better at solving puzzles?",
+        "Who's stronger?",
+        "Who's faster?",
+        "Who's better at building things?",
+        "Who's a better photographer?",
+        "Who's better at singing?",
+        "Who has better fashion sense?",
+        "Who's better at DIY projects?",
+        "Who's a better writer?",
+        "Who's better at gardening?",
+        "Who's more creative with ideas?",
+        "Who's better at memorizing things?",
+        "Who's more handy around the house?",
+        "Who's better at chess?",
+        "Who's a better negotiator?",
+        "Who's better at parallel parking?",
+        "Who's more resourceful?",
+        "Who's better at public speaking?",
+        "Who has better music taste?",
+        "Who's better at crafts?",
+        "Who's more graceful?",
+        "Who has better rhythm?",
+        "Who's better at coding?",
+        "Who's better at spelling?",
+        "Who's more talented overall?",
+        "Who's better at multitasking?",
+        "Who's better at card games?",
+        "Who has better coordination?",
+        "Who's better at problem-solving?",
+        "Who's more skilled with tools?",
+        "Who's better at languages?",
+        "Who has better memory?",
+        "Who's better at planning?",
+        "Who's more flexible?",
+        "Who has better reflexes?",
+        "Who's better at strategy games?",
+        
+        // Personality Questions (50)
+        "Who's the better listener?",
+        "Who's more creative?",
+        "Who's more adventurous?",
+        "Who gives the best advice?",
+        "Who's the biggest foodie?",
+        "Who's more outgoing?",
+        "Who's more patient?",
+        "Who's more optimistic?",
+        "Who's more determined?",
+        "Who's more generous?",
+        "Who's more confident?",
+        "Who's more ambitious?",
+        "Who's more reliable?",
+        "Who's more spontaneous?",
+        "Who's more caring?",
+        "Who's more responsible?",
+        "Who's a better leader?",
+        "Who's more curious?",
+        "Who's more humble?",
+        "Who's more loyal?",
+        "Who's more honest?",
+        "Who's more independent?",
+        "Who's more thoughtful?",
+        "Who's more forgiving?",
+        "Who's more courageous?",
+        "Who's more energetic?",
+        "Who's calmer under pressure?",
+        "Who's more polite?",
+        "Who's more respectful?",
+        "Who's more positive?",
+        "Who's friendlier?",
+        "Who's more open-minded?",
+        "Who's more adaptable?",
+        "Who's wiser?",
+        "Who's more motivated?",
+        "Who's more disciplined?",
+        "Who's more passionate?",
+        "Who's more empathetic?",
+        "Who's more mature?",
+        "Who's more chill?",
+        "Who's more understanding?",
+        "Who's more authentic?",
+        "Who's more cheerful?",
+        "Who's more focused?",
+        "Who's more practical?",
+        "Who has better vibes?",
+        "Who's more supportive?",
+        "Who's more mindful?",
+        "Who's more sincere?",
+        "Who's more balanced?",
+        
+        // Future/Hypothetical Questions (40)
+        "Who would make a better teacher?",
+        "Who would be a better president?",
+        "Who would survive a zombie apocalypse?",
+        "Who would win a talent show?",
+        "Who's most likely to become a millionaire?",
+        "Who would be a better doctor?",
+        "Who would make a better detective?",
+        "Who would be a better chef?",
+        "Who's most likely to travel the world?",
+        "Who would be a better parent?",
+        "Who's most likely to write a book?",
+        "Who would be a better astronaut?",
+        "Who's most likely to start a business?",
+        "Who would be a better actor?",
+        "Who's most likely to win the lottery?",
+        "Who would be a better scientist?",
+        "Who's most likely to become an inventor?",
+        "Who would be a better lawyer?",
+        "Who's most likely to save the world?",
+        "Who would be a better athlete?",
+        "Who's most likely to discover something new?",
+        "Who would be a better architect?",
+        "Who's most likely to become a professor?",
+        "Who would be a better veterinarian?",
+        "Who's most likely to climb Mount Everest?",
+        "Who would be a better engineer?",
+        "Who's most likely to win an Oscar?",
+        "Who would be a better pilot?",
+        "Who's most likely to become a politician?",
+        "Who would be a better artist?",
+        "Who's most likely to break a world record?",
+        "Who would be a better coach?",
+        "Who's most likely to live to 100?",
+        "Who would be a better therapist?",
+        "Who's most likely to run a marathon?",
+        "Who would be a better designer?",
+        "Who's most likely to adopt all the pets?",
+        "Who would be a better firefighter?",
+        "Who's most likely to move to another country?",
+        "Who would make the world a better place?"
     ]
 };
 
@@ -626,10 +835,22 @@ function shuffleArray(array) {
     return shuffled;
 }
 
-// Get random 20 questions from a mode
+// Get random 20 questions from a mode (80% anonymous, 20% public)
 function getRandomQuestions(mode) {
     const questions = questionBanks[mode] || [];
-    return shuffleArray(questions).slice(0, Math.min(20, questions.length));
+    const shuffled = shuffleArray(questions).slice(0, Math.min(20, questions.length));
+    
+    // Mark questions as public or anonymous
+    // 80% anonymous (16 questions), 20% public (4 questions)
+    const publicIndices = new Set();
+    while (publicIndices.size < 4 && publicIndices.size < shuffled.length) {
+        publicIndices.add(Math.floor(Math.random() * shuffled.length));
+    }
+    
+    return shuffled.map((question, index) => ({
+        text: question,
+        isPublic: publicIndices.has(index)
+    }));
 }
 
 io.on('connection', (socket) => {
@@ -789,8 +1010,9 @@ io.on('connection', (socket) => {
             game.status = 'playing';
             game.currentQuestionIndex = 0;
             
-            // Determine if first question is anonymous (most are)
-            const isAnonymous = Math.random() > 0.25; // 75% anonymous
+            // Get first question and check if it's public
+            const firstQuestion = game.questions[0];
+            const isAnonymous = !firstQuestion.isPublic;
             
             // Get two random players for voting
             const shuffled = [...game.players].sort(() => Math.random() - 0.5);
@@ -806,7 +1028,7 @@ io.on('connection', (socket) => {
             
             io.to(gameCode).emit('game-started', {
                 mode,
-                question: game.questions[0],
+                question: firstQuestion.text,
                 questionNumber: 1,
                 totalQuestions: game.questions.length,
                 isAnonymous,
@@ -952,8 +1174,9 @@ io.on('connection', (socket) => {
                 });
             }
 
-            // Determine if this question is anonymous
-            const isAnonymous = (currentQ + 1) % 3 !== 0; // Every 3rd question is NOT anonymous
+            // Check if this question is public or anonymous
+            const currentQuestion = game.questions[currentQ];
+            const isAnonymous = !currentQuestion.isPublic;
 
             io.to(gameCode).emit('vote-results', {
                 voteCounts,
@@ -1002,7 +1225,9 @@ io.on('connection', (socket) => {
             return;
         }
 
-        const isAnonymous = (game.currentQuestionIndex + 1) % 3 !== 0;
+        // Get current question and check if it's public
+        const currentQuestion = game.questions[game.currentQuestionIndex];
+        const isAnonymous = !currentQuestion.isPublic;
 
         // Get two random players for voting
         const shuffled = [...game.players].sort(() => Math.random() - 0.5);
@@ -1017,7 +1242,7 @@ io.on('connection', (socket) => {
         console.log('Player 2:', player2);
 
         io.to(gameCode).emit('next-question', {
-            question: game.questions[game.currentQuestionIndex],
+            question: currentQuestion.text,
             questionNumber: game.currentQuestionIndex + 1,
             totalQuestions: game.questions.length,
             isAnonymous,
