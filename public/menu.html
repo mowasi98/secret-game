@@ -83,9 +83,15 @@
         </div>
     </div>
 
-    <!-- About Section -->
-    <div class="about-box">
-        <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 8px;">🎭 About Secret</div>
+    <!-- About Button (bottom left) -->
+    <button class="about-btn" id="aboutBtn">
+        ℹ️ What's this game about?
+    </button>
+
+    <!-- About Popup (hidden by default) -->
+    <div class="about-popup hidden" id="aboutPopup">
+        <button class="about-close" id="aboutClose">✕</button>
+        <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 12px;">🎭 About Secret</div>
         <p style="margin: 0; line-height: 1.5;">
             The ultimate party game for friends!<br>
             Answer spicy questions, vote anonymously,<br>
@@ -98,6 +104,16 @@
             Ages 18+ • 3-10 players
         </p>
     </div>
+
+    <script>
+        // About popup toggle
+        document.getElementById('aboutBtn').addEventListener('click', () => {
+            document.getElementById('aboutPopup').classList.remove('hidden');
+        });
+        document.getElementById('aboutClose').addEventListener('click', () => {
+            document.getElementById('aboutPopup').classList.add('hidden');
+        });
+    </script>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
