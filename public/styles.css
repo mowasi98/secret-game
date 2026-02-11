@@ -1610,6 +1610,36 @@ body::after {
     letter-spacing: 0.3px;
 }
 
+/* About box - bottom left */
+.about-box {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(20, 20, 40, 0.7);
+    backdrop-filter: blur(20px);
+    padding: 20px 25px;
+    border-radius: 20px;
+    border: 2px solid rgba(108, 58, 237, 0.3);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 0.85rem;
+    max-width: 320px;
+    z-index: 1000;
+    animation: slideInLeft 0.5s ease;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .container {
@@ -1757,6 +1787,25 @@ body::after {
     .vs-text {
         font-size: 1.5rem;
         margin: 0 5px;
+    }
+
+    /* About box on mobile - make smaller and adjust position */
+    .about-box {
+        bottom: 10px;
+        left: 10px;
+        padding: 12px 15px;
+        max-width: 200px;
+        font-size: 0.7rem;
+    }
+
+    .about-box div[style*="font-size: 1.3rem"] {
+        font-size: 1rem !important;
+        margin-bottom: 5px !important;
+    }
+
+    .about-box p {
+        line-height: 1.3 !important;
+        margin: 5px 0 0 0 !important;
     }
 
     /* Results mobile */
