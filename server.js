@@ -484,6 +484,30 @@ io.on('connection', (socket) => {
         game.currentQuestionIndex++;
 
         if (game.currentQuestionIndex >= game.questions.length) {
+            // Last question finished - check if we should show crush question
+            if (game.mode === 'spicy') {
+                // Count boys and girls
+                const boys = game.players.filter(p => p.gender === 'boy');
+                const girls = game.players.filter(p => p.gender === 'girl');
+
+                if (boys.length > 0 && girls.length > 0) {
+                    // Mixed genders - show crush question
+                    console.log(`Showing crush question for game ${gameCode}`);
+                    game.status = 'crush-voting';
+                    game.crushVotes = {};
+
+                    // Send crush question to each player with their opposite gender options
+                    game.players.forEach(player => {
+                        const oppositeGender = player.gender === 'boy' ? 'girl' : 'boy';
+                        const options = game.players.filter(p => p.gender === oppositeGender);
+
+                        io.to(player.id).emit('show-crush-question', { options });
+                    });
+                    return;
+                }
+            }
+
+            // No crush question - go straight to finished
             game.status = 'finished';
             io.to(gameCode).emit('game-finished');
             return;
@@ -517,11 +541,45 @@ io.on('connection', (socket) => {
         const game = games.get(gameCode);
         if (!game) return;
 
-        // Store anonymously
+        // Store anonymously (never reveal these votes)
         if (!game.crushVotes) game.crushVotes = {};
         game.crushVotes[socket.id] = crushId;
 
-        socket.emit('crush-submitted');
+        console.log(`Player submitted crush vote. Total: ${Object.keys(game.crushVotes).length}/${game.players.length}`);
+
+        // Check if everyone voted
+        const allVoted = game.players.every(p => game.crushVotes[p.id] !== undefined);
+
+        if (allVoted) {
+            console.log(`All players voted on crush question for game ${gameCode}`);
+            game.status = 'finished';
+            io.to(gameCode).emit('game-finished');
+        }
+    });
+
+    // Play again with same party
+    socket.on('play-again', ({ gameCode }) => {
+        const game = games.get(gameCode);
+        
+        if (!game || game.adminId !== socket.id) {
+            socket.emit('error', 'Only admin can restart the game');
+            return;
+        }
+
+        console.log(`Game ${gameCode} restarting - returning to lobby`);
+
+        // Reset game state
+        game.mode = null;
+        game.status = 'lobby';
+        game.currentQuestionIndex = 0;
+        game.questions = [];
+        game.votes = {};
+        game.crushVotes = {};
+        game.wheelSubmissions = {};
+        game.wheelData = [];
+
+        // Send everyone back to lobby
+        io.to(gameCode).emit('return-to-lobby');
     });
 
     // Disconnect

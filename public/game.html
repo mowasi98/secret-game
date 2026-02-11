@@ -236,12 +236,20 @@
 
         <!-- Game Finished -->
         <div class="page hidden" id="finishedPage">
-            <div class="text-bubble" style="font-size: 2rem;">
-                🎉 Game Finished!
+            <div class="text-bubble" style="font-size: 2.5rem; margin-bottom: 20px;">
+                🎉 Game Over! 🎉
             </div>
 
-            <button class="glass-btn" id="backToMenuBtn">
-                Back to Menu
+            <div class="text-bubble" style="font-size: 1.2rem; margin-bottom: 40px;">
+                What's next?
+            </div>
+
+            <button class="glass-btn" id="playAgainBtn" style="margin-bottom: 20px;">
+                🔄 Play Again (Same Party)
+            </button>
+
+            <button class="glass-btn" id="newPartyBtn">
+                🆕 New Party
             </button>
         </div>
     </div>
@@ -714,15 +722,83 @@
             document.getElementById('nextQuestionBtn').classList.add('hidden');
         });
 
+        // Show crush question (Spicy mode only)
+        socket.on('show-crush-question', (data) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById('crushPage').classList.remove('hidden');
+
+            const crushOptions = document.getElementById('crushOptions');
+            crushOptions.innerHTML = '';
+
+            let selectedCrush = null;
+
+            // Show opposite gender players
+            data.options.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'voter-item';
+                playerCard.style.cursor = 'pointer';
+                playerCard.innerHTML = `
+                    <img src="${player.photo}" alt="${player.name}" class="voter-avatar">
+                    <div class="voter-name">${player.name}</div>
+                `;
+
+                playerCard.addEventListener('click', () => {
+                    // Remove selection from all
+                    crushOptions.querySelectorAll('.voter-item').forEach(item => {
+                        item.style.border = 'none';
+                        item.style.transform = 'scale(1)';
+                    });
+
+                    // Highlight selected
+                    playerCard.style.border = '3px solid #6c3aed';
+                    playerCard.style.transform = 'scale(1.1)';
+                    selectedCrush = player.id;
+                    document.getElementById('submitCrushBtn').disabled = false;
+                });
+
+                crushOptions.appendChild(playerCard);
+            });
+
+            // Submit crush
+            document.getElementById('submitCrushBtn').onclick = () => {
+                if (!selectedCrush) return;
+                
+                socket.emit('submit-crush', { gameCode, crushId: selectedCrush });
+                document.getElementById('submitCrushBtn').disabled = true;
+                document.getElementById('submitCrushBtn').textContent = '✓ Submitted';
+                
+                // Show waiting
+                document.getElementById('crushPage').classList.add('hidden');
+                document.getElementById('waitingPage').classList.remove('hidden');
+                document.getElementById('waitingText').textContent = 'Waiting for everyone to vote...';
+            };
+        });
+
         // Game finished
         socket.on('game-finished', () => {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById('finishedPage').classList.remove('hidden');
         });
 
-        document.getElementById('backToMenuBtn').addEventListener('click', () => {
+        // Play Again (Same Party)
+        document.getElementById('playAgainBtn').addEventListener('click', () => {
+            if (!isAdmin) {
+                alert('Only the admin can start a new game!');
+                return;
+            }
+            socket.emit('play-again', { gameCode });
+        });
+
+        // New Party
+        document.getElementById('newPartyBtn').addEventListener('click', () => {
             localStorage.removeItem('currentGameCode');
+            socket.disconnect();
             window.location.href = '/menu.html';
+        });
+
+        // Listen for play again event
+        socket.on('return-to-lobby', () => {
+            window.location.href = '/lobby.html';
         });
 
         // Leave game
