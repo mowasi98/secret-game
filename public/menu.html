@@ -88,9 +88,15 @@
 
         document.getElementById('userPhoto').src = profile.photo;
 
+        let profileReady = false;
+
         // Set profile on connect
         socket.on('connect', () => {
             socket.emit('set-profile', profile);
+        });
+
+        socket.on('profile-confirmed', () => {
+            profileReady = true;
         });
 
         // Click profile to edit
@@ -101,7 +107,13 @@
 
         // Create game
         document.getElementById('createGameBtn').addEventListener('click', () => {
-            socket.emit('create-game');
+            if (!profileReady) {
+                setTimeout(() => {
+                    socket.emit('create-game');
+                }, 1000);
+            } else {
+                socket.emit('create-game');
+            }
         });
 
         socket.on('game-created', (data) => {
@@ -127,7 +139,13 @@
         document.getElementById('joinBtn').addEventListener('click', () => {
             const pin = document.getElementById('gamePinInput').value.trim();
             if (pin.length === 6) {
-                socket.emit('join-game', pin);
+                if (!profileReady) {
+                    setTimeout(() => {
+                        socket.emit('join-game', pin);
+                    }, 1000);
+                } else {
+                    socket.emit('join-game', pin);
+                }
             } else {
                 alert('Please enter a valid 6-digit PIN');
             }
