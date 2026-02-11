@@ -173,9 +173,11 @@
             const circle = document.getElementById('playersCircle');
             circle.innerHTML = '';
 
-            // Responsive radius based on screen size
+            // Responsive radius based on screen size - FIXED to match CSS circle size
             const isMobile = window.innerWidth <= 600;
-            const radius = isMobile ? 100 : 140;
+            // Mobile circle: 280px / 2 = 140px radius
+            // Desktop circle: 340px / 2 = 170px radius
+            const radius = isMobile ? 140 : 170;
             const centerX = isMobile ? 140 : 170;
             const centerY = isMobile ? 140 : 170;
             const avatarSize = isMobile ? 35 : 37.5;
