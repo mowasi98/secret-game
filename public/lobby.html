@@ -154,9 +154,12 @@
             const circle = document.getElementById('playersCircle');
             circle.innerHTML = '';
 
-            const radius = 140;
-            const centerX = 170;
-            const centerY = 170;
+            // Responsive radius based on screen size
+            const isMobile = window.innerWidth <= 600;
+            const radius = isMobile ? 100 : 140;
+            const centerX = isMobile ? 140 : 170;
+            const centerY = isMobile ? 140 : 170;
+            const avatarSize = isMobile ? 35 : 37.5;
 
             players.forEach((player, index) => {
                 const angle = (index / players.length) * 2 * Math.PI - Math.PI / 2;
@@ -165,8 +168,8 @@
 
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'player-item';
-                playerDiv.style.left = `${x - 37.5}px`;
-                playerDiv.style.top = `${y - 37.5}px`;
+                playerDiv.style.left = `${x - avatarSize}px`;
+                playerDiv.style.top = `${y - avatarSize}px`;
 
                 const isPlayerAdmin = player.id === currentGame?.adminId;
                 const isCurrentUser = player.id === socket.id;
@@ -213,7 +216,39 @@
         socket.on('player-left', (data) => {
             currentGame.players = data.players;
             updateLobby();
+            
+            // Show notification
+            if (data.playerName) {
+                showNotification(`${data.playerName} left the game`);
+            }
         });
+
+        // Show notification function
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(244, 67, 54, 0.9);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 9999;
+                animation: slideDown 0.3s ease;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideUp 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
 
         socket.on('new-admin', (data) => {
             currentGame.adminId = data.adminId;

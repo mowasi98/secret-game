@@ -1135,13 +1135,13 @@ io.on('connection', (socket) => {
             console.log(`Player ${playerData.name} marked as disconnected`);
         }
         
-        // Give players 5 MINUTES to reconnect (especially important for mobile/unstable connections)
+        // Give players 10 SECONDS to reconnect
         setTimeout(() => {
             const player = players.get(socket.id);
             
             // Only clean up if player never reconnected
             if (player && player.disconnectedAt) {
-                console.log(`Cleaning up player ${socket.id} after 5 min timeout`);
+                console.log(`Cleaning up player ${socket.id} after 10 sec timeout`);
                 
                 // Remove player from games
                 for (const [gameCode, game] of games.entries()) {
@@ -1156,9 +1156,13 @@ io.on('connection', (socket) => {
                             console.log(`Admin disconnected from game ${gameCode}, keeping game alive`);
                         }
                         
-                        io.to(gameCode).emit('player-left', { playerId: socket.id, players: game.players });
+                        io.to(gameCode).emit('player-left', { 
+                            playerId: socket.id, 
+                            playerName: player.name,
+                            players: game.players 
+                        });
                         
-                        // Only delete game if empty AND it's been 5+ minutes
+                        // Only delete game if empty AND it's been 10+ seconds
                         if (game.players.length === 0) {
                             console.log(`Deleting empty game after timeout: ${gameCode}`);
                             games.delete(gameCode);
@@ -1169,7 +1173,7 @@ io.on('connection', (socket) => {
                 // Remove from players map
                 players.delete(socket.id);
             }
-        }, 300000); // 5 MINUTE grace period (300000ms)
+        }, 10000); // 10 SECOND grace period (10000ms)
     });
 });
 

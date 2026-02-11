@@ -427,11 +427,26 @@
                 isLoggedIn = true;
                 document.getElementById('loginPage').classList.add('hidden');
                 document.getElementById('dashboardPage').classList.remove('hidden');
-                socket.emit('admin-auth', { password });
+                
+                // Send auth when socket is ready
+                if (socket.connected) {
+                    socket.emit('admin-auth', { password });
+                } else {
+                    socket.on('connect', () => {
+                        socket.emit('admin-auth', { password });
+                    });
+                }
             } else {
                 document.getElementById('loginError').style.display = 'block';
             }
         }
+
+        // Also request data periodically to keep updated
+        setInterval(() => {
+            if (isLoggedIn && !currentGameCode) {
+                socket.emit('admin-auth', { password: ADMIN_PASSWORD });
+            }
+        }, 5000); // Refresh every 5 seconds
 
         // Receive all games data
         socket.on('admin-games-data', (data) => {

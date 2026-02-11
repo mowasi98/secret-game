@@ -1675,6 +1675,11 @@ body::after {
     .players-circle {
         width: 280px;
         height: 280px;
+        position: relative;
+    }
+
+    .player-item {
+        position: absolute;
     }
 
     .player-avatar {
@@ -1727,30 +1732,31 @@ body::after {
         height: 320px;
     }
 
-    /* Player voting cards mobile */
+    /* Player voting cards mobile - side by side */
     .player-vote-options {
-        flex-direction: column;
-        gap: 15px;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
     }
 
     .player-vote-card {
-        width: 100%;
-        max-width: 280px;
-        padding: 20px;
+        width: 130px;
+        padding: 15px 10px;
     }
 
     .player-vote-avatar {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
     }
 
     .player-vote-name {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
     }
 
     .vs-text {
-        font-size: 1.8rem;
-        margin: 10px 0;
+        font-size: 1.5rem;
+        margin: 0 5px;
     }
 
     /* Results mobile */

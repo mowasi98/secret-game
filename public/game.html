@@ -54,6 +54,10 @@
 
         <!-- Wheel Mode: Spinning Phase -->
         <div class="page hidden" id="wheelSpinPage">
+            <div style="position: absolute; top: 20px; right: 20px; background: rgba(108, 58, 237, 0.3); padding: 10px 20px; border-radius: 15px; font-weight: 700; font-size: 1.1rem; border: 2px solid rgba(108, 58, 237, 0.5);" id="wheelCounter">
+                1 / 40
+            </div>
+
             <div class="text-bubble" id="wheelStatusText">
                 Time to spin the wheel!
             </div>
@@ -265,6 +269,15 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+
+        // Handle page visibility (phone background/lock)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && socket.connected) {
+                // Page came back to foreground, rejoin game to sync
+                console.log('Page visible again, resyncing...');
+                socket.emit('join-game', { gameCode, player: profile });
+            }
+        });
         const gameCode = localStorage.getItem('currentGameCode');
         const profile = JSON.parse(localStorage.getItem('secretProfile'));
         const urlParams = new URLSearchParams(window.location.search);
@@ -424,6 +437,9 @@
                 `${data.submitted}/${data.total} submitted`;
         });
 
+        let wheelTotalQuestions = 0;
+        let wheelCurrentQuestion = 0;
+
         // Wheel ready
         socket.on('wheel-ready', () => {
             document.getElementById('waitingPage').classList.add('hidden');
@@ -468,6 +484,13 @@
 
         // Wheel result
         socket.on('wheel-result', (data) => {
+            // Update counter
+            if (wheelTotalQuestions === 0) {
+                wheelTotalQuestions = data.remaining + 1; // Set total on first result
+            }
+            wheelCurrentQuestion = wheelTotalQuestions - data.remaining;
+            document.getElementById('wheelCounter').textContent = `${wheelCurrentQuestion} / ${wheelTotalQuestions}`;
+
             // Play drum roll after wheel stops (at 3.5 seconds)
             setTimeout(() => {
                 document.getElementById('wheelStatusText').textContent = '🥁 Drum roll...';
@@ -656,7 +679,8 @@
 
         // Vote results
         socket.on('vote-results', (data) => {
-            // Hide waiting page and text
+            // Hide ALL other pages first
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById('waitingPage').classList.add('hidden');
             document.getElementById('waitingText').textContent = 'Waiting for everyone else...'; // Reset for next time
             
