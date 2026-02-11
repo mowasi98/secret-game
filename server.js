@@ -20,8 +20,12 @@ console.log('✅ Socket.io server configured');
 
 const PORT = process.env.PORT || 3000;
 
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files with caching
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '1d', // Cache for 1 day
+    etag: true,
+    lastModified: true
+}));
 app.use(express.json());
 
 // Admin panel route
