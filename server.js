@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -1066,7 +1067,7 @@ io.on('connection', (socket) => {
 
     // Admin: Authenticate and get all games
     socket.on('admin-auth', (data) => {
-        const ADMIN_PASSWORD = 'secret123'; // Change this to your password
+        const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'wasishah98';
         
         if (data.password === ADMIN_PASSWORD) {
             console.log('Admin authenticated:', socket.id);
