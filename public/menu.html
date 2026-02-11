@@ -116,6 +116,7 @@
         });
     </script>
 
+    <script src="modal.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
@@ -162,7 +163,7 @@
         });
 
         socket.on('error', (msg) => {
-            alert(msg);
+            showError(msg);
         });
 
         // Join game
@@ -187,7 +188,7 @@
                     socket.emit('join-game', pin);
                 }
             } else {
-                alert('Please enter a valid 6-digit PIN');
+                showError('Please enter a valid 6-digit PIN');
             }
         });
 
@@ -214,14 +215,14 @@
 
         // Logout button
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm('Are you sure you want to logout?')) {
+            showConfirm('Are you sure you want to logout?', () => {
                 // Clear profile from localStorage
                 localStorage.removeItem('secretProfile');
                 // Disconnect socket
                 socket.disconnect();
                 // Redirect to profile setup
                 window.location.href = '/';
-            }
+            });
         });
     </script>
 </body>

@@ -136,6 +136,7 @@
         </div>
     </div>
 
+    <script src="modal.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
@@ -339,7 +340,7 @@
             console.error('Socket error:', message);
             // Only show alert if we're not on the initial join
             if (currentGame) {
-                alert(message);
+                showError(message);
             } else {
                 // Retry joining after a delay if game not found on initial join
                 if (message.includes('Game not found')) {
