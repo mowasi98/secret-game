@@ -119,26 +119,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // Detect if mobile
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        // Force polling for mobile (more reliable)
-        const socket = io({
-            transports: isMobile ? ['polling'] : ['polling', 'websocket'],
-            reconnection: true,
-            reconnectionDelay: 1000,
-            reconnectionAttempts: 10,
-            timeout: 20000,
-            upgrade: !isMobile, // Don't try to upgrade to websocket on mobile
-            forceNew: true
-        });
-
-        console.log('🔍 Device:', isMobile ? 'MOBILE' : 'DESKTOP');
-        console.log('🔌 Transports:', socket.io.opts.transports);
-
-        socket.on('connect_error', (error) => {
-            console.error('❌ Connection error:', error);
-        });
+        const socket = io();
         const gameCode = localStorage.getItem('currentGameCode');
         const profile = JSON.parse(localStorage.getItem('secretProfile'));
 
@@ -148,28 +129,16 @@
 
         let isAdmin = false;
         let currentGame = null;
-        let socketConnected = false;
-        let modeSelecting = false;
 
         // Display game PIN
         document.getElementById('gamePinDisplay').textContent = gameCode;
 
-        // Wait for socket to connect, then set profile and join game
+        // Set profile and join game on connect
         socket.on('connect', () => {
-            console.log('Socket connected, setting profile and joining game');
-            socketConnected = true;
             socket.emit('set-profile', profile);
-            
-            // Give server time to register profile
             setTimeout(() => {
-                console.log('Joining game:', gameCode);
                 socket.emit('join-game', gameCode);
-            }, 300);
-        });
-
-        socket.on('disconnect', () => {
-            console.log('Socket disconnected!');
-            socketConnected = false;
+            }, 100);
         });
 
         // If already connected, do it immediately
@@ -177,7 +146,7 @@
             socket.emit('set-profile', profile);
             setTimeout(() => {
                 socket.emit('join-game', gameCode);
-            }, 300);
+            }, 100);
         }
 
         // Calculate circular positions for players
@@ -280,16 +249,9 @@
         // Mode card clicks
         document.querySelectorAll('.mode-card').forEach(card => {
             card.addEventListener('click', () => {
-                if (!socketConnected) {
-                    alert('Connecting to server... Please try again in a moment.');
-                    return;
-                }
                 if (!isAdmin) {
                     return; // Only admin can select mode
                 }
-                if (modeSelecting) return; // Prevent double clicks
-                modeSelecting = true;
-                card.style.opacity = '0.5';
                 
                 const mode = card.dataset.mode;
                 socket.emit('select-mode', { gameCode, mode });
