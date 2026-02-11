@@ -787,6 +787,9 @@ io.on('connection', (socket) => {
             const player1 = shuffled[0];
             const player2 = shuffled[1];
             
+            // Store for admin panel
+            game.currentVotingPlayers = [player1, player2];
+            
             console.log('Sending players for question 1:');
             console.log('Player 1:', player1);
             console.log('Player 2:', player2);
@@ -996,6 +999,9 @@ io.on('connection', (socket) => {
         const player1 = shuffled[0];
         const player2 = shuffled[1];
 
+        // Store for admin panel
+        game.currentVotingPlayers = [player1, player2];
+
         console.log(`Sending players for question ${game.currentQuestionIndex + 1}:`);
         console.log('Player 1:', player1);
         console.log('Player 2:', player2);
@@ -1056,6 +1062,60 @@ io.on('connection', (socket) => {
 
         // Send everyone back to lobby
         io.to(gameCode).emit('return-to-lobby');
+    });
+
+    // Admin: Authenticate and get all games
+    socket.on('admin-auth', (data) => {
+        const ADMIN_PASSWORD = 'secret123'; // Change this to your password
+        
+        if (data.password === ADMIN_PASSWORD) {
+            console.log('Admin authenticated:', socket.id);
+            
+            // Send all games data
+            const gamesArray = Array.from(games.values()).map(game => ({
+                code: game.code,
+                mode: game.mode,
+                status: game.status,
+                players: game.players,
+                adminId: game.adminId,
+                currentQuestionIndex: game.currentQuestionIndex,
+                questions: game.questions
+            }));
+            
+            socket.emit('admin-games-data', { games: gamesArray });
+        }
+    });
+
+    // Admin: Get specific game details
+    socket.on('admin-get-game-details', (data) => {
+        const game = games.get(data.gameCode);
+        
+        if (!game) {
+            socket.emit('error', 'Game not found');
+            return;
+        }
+
+        // Prepare detailed game data
+        const gameDetails = {
+            code: game.code,
+            mode: game.mode,
+            status: game.status,
+            players: game.players,
+            adminId: game.adminId,
+            currentQuestionIndex: game.currentQuestionIndex,
+            questions: game.questions,
+            votes: game.votes,
+            wheelSubmissions: game.wheelSubmissions,
+            wheelData: game.wheelData,
+            crushVotes: game.crushVotes
+        };
+
+        // If currently voting, include the current voting players
+        if (game.status === 'playing' && game.currentVotingPlayers) {
+            gameDetails.currentVotingPlayers = game.currentVotingPlayers;
+        }
+
+        socket.emit('admin-game-details', gameDetails);
     });
 
     // Disconnect

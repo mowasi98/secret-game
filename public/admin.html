@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Secret Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #6c3aed, #2d5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-box {
+            max-width: 400px;
+            margin: 100px auto;
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(108, 58, 237, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .game-card {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(108, 58, 237, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(108, 58, 237, 0.6);
+            box-shadow: 0 15px 50px rgba(108, 58, 237, 0.3);
+        }
+
+        .game-pin {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #6c3aed;
+            margin-bottom: 10px;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .info-badge {
+            background: rgba(108, 58, 237, 0.2);
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(108, 58, 237, 0.3);
+        }
+
+        .detail-section {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(108, 58, 237, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .player-vote-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin: 10px 0;
+        }
+
+        .player-vote-row img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .voted {
+            color: #4caf50;
+        }
+
+        .not-voted {
+            color: #ff9800;
+        }
+
+        .back-btn {
+            background: rgba(108, 58, 237, 0.3);
+            border: 2px solid rgba(108, 58, 237, 0.5);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(108, 58, 237, 0.5);
+            transform: translateX(-5px);
+        }
+
+        .question-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .question-history-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+        }
+
+        .no-games {
+            text-align: center;
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 60px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(108, 58, 237, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #6c3aed;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+        }
+
+        .wheel-submissions {
+            display: grid;
+            gap: 15px;
+        }
+
+        .wheel-player-submission {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .wheel-prompt-answer {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(108, 58, 237, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid #6c3aed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Floating emojis -->
+        <div class="sparkle" style="top: 10%; left: 8%;">🔥</div>
+        <div class="sparkle" style="top: 18%; right: 12%; animation-delay: 0.8s;">🌶️</div>
+        <div class="sparkle" style="top: 28%; left: 15%; animation-delay: 1.5s;">😜</div>
+        <div class="sparkle" style="top: 40%; right: 10%; animation-delay: 2.2s;">🎉</div>
+        <div class="sparkle" style="bottom: 25%; left: 10%; animation-delay: 0.6s;">🎭</div>
+        <div class="sparkle" style="bottom: 15%; right: 15%; animation-delay: 2.4s;">💥</div>
+
+        <!-- Login Page -->
+        <div id="loginPage">
+            <div class="login-box">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 4rem;">🔐</div>
+                    <h1 style="font-size: 2rem; margin-top: 10px;">Admin Login</h1>
+                </div>
+
+                <input 
+                    type="password" 
+                    class="glass-input" 
+                    id="adminPassword" 
+                    placeholder="Enter admin password"
+                    style="margin-bottom: 20px;"
+                >
+
+                <button class="glass-btn" id="loginBtn" style="width: 100%;">
+                    🔓 Login
+                </button>
+
+                <div id="loginError" style="color: #ff6b6b; text-align: center; margin-top: 15px; display: none;">
+                    ❌ Incorrect password
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardPage" class="hidden">
+            <div class="admin-container">
+                <div class="admin-header">
+                    <div class="admin-title">🎭 ADMIN DASHBOARD</div>
+                    <div style="color: rgba(255, 255, 255, 0.6);">Real-time game monitoring</div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalGames">0</div>
+                        <div class="stat-label">Active Games</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalPlayers">0</div>
+                        <div class="stat-label">Total Players</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="spicyGames">0</div>
+                        <div class="stat-label">🌶️ Spicy Games</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="partyGames">0</div>
+                        <div class="stat-label">🎉 Party Games</div>
+                    </div>
+                </div>
+
+                <!-- Games List -->
+                <div class="detail-section">
+                    <h2 style="margin-bottom: 20px;">🎮 Live Games</h2>
+                    <div id="gamesList">
+                        <div class="no-games">No active games</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Details -->
+        <div id="gameDetailsPage" class="hidden">
+            <div class="admin-container">
+                <div class="back-btn" id="backToDashboard">← Back to Dashboard</div>
+
+                <div class="admin-header">
+                    <div class="admin-title" id="gameDetailTitle">Game Details</div>
+                </div>
+
+                <!-- Current Question/Status -->
+                <div class="detail-section" id="currentQuestionSection">
+                    <h2>📍 Current Status</h2>
+                    <div id="currentStatusContent"></div>
+                </div>
+
+                <!-- Live Votes -->
+                <div class="detail-section" id="liveVotesSection" style="display: none;">
+                    <h2>📊 Live Votes</h2>
+                    <div id="liveVotesContent"></div>
+                </div>
+
+                <!-- Wheel Submissions -->
+                <div class="detail-section" id="wheelSubmissionsSection" style="display: none;">
+                    <h2>🎡 Wheel Submissions</h2>
+                    <div id="wheelSubmissionsContent" class="wheel-submissions"></div>
+                </div>
+
+                <!-- Question History -->
+                <div class="detail-section" id="questionHistorySection" style="display: none;">
+                    <h2>📜 Question History</h2>
+                    <div id="questionHistoryContent" class="question-history"></div>
+                </div>
+
+                <!-- Players List -->
+                <div class="detail-section">
+                    <h2>👥 Players in Game</h2>
+                    <div id="playersListContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let isLoggedIn = false;
+        let currentGameCode = null;
+
+        const ADMIN_PASSWORD = "secret123"; // Change this to your password
+
+        // Login
+        document.getElementById('loginBtn').addEventListener('click', login);
+        document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
+        });
+
+        function login() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                isLoggedIn = true;
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('dashboardPage').classList.remove('hidden');
+                socket.emit('admin-auth', { password });
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Receive all games data
+        socket.on('admin-games-data', (data) => {
+            if (!isLoggedIn) return;
+            
+            updateStats(data.games);
+            displayGames(data.games);
+        });
+
+        // Update stats
+        function updateStats(games) {
+            const totalGames = games.length;
+            let totalPlayers = 0;
+            let spicyCount = 0;
+            let partyCount = 0;
+
+            games.forEach(game => {
+                totalPlayers += game.players.length;
+                if (game.mode === 'spicy') spicyCount++;
+                if (game.mode === 'party') partyCount++;
+            });
+
+            document.getElementById('totalGames').textContent = totalGames;
+            document.getElementById('totalPlayers').textContent = totalPlayers;
+            document.getElementById('spicyGames').textContent = spicyCount;
+            document.getElementById('partyGames').textContent = partyCount;
+        }
+
+        // Display games list
+        function displayGames(games) {
+            const gamesList = document.getElementById('gamesList');
+            
+            if (games.length === 0) {
+                gamesList.innerHTML = '<div class="no-games">No active games</div>';
+                return;
+            }
+
+            gamesList.innerHTML = '';
+            
+            games.forEach(game => {
+                const modeEmoji = {
+                    'spicy': '🌶️',
+                    'party': '🎉',
+                    'cheeky': '😜',
+                    'wheel': '🎡'
+                };
+
+                const statusText = {
+                    'lobby': 'In Lobby',
+                    'playing': `Playing (Q: ${game.currentQuestionIndex + 1}/${game.questions?.length || 0})`,
+                    'wheel-input': 'Wheel: Input Phase',
+                    'wheel-ready': 'Wheel: Spinning',
+                    'crush-voting': 'Crush Question',
+                    'finished': 'Finished'
+                };
+
+                const gameCard = document.createElement('div');
+                gameCard.className = 'game-card';
+                gameCard.innerHTML = `
+                    <div class="game-pin">📍 PIN: ${game.code}</div>
+                    <div class="game-info">
+                        <div class="info-badge">${modeEmoji[game.mode] || '🎮'} ${game.mode || 'No mode'}</div>
+                        <div class="info-badge">👥 ${game.players.length}/10 Players</div>
+                        <div class="info-badge">📊 ${statusText[game.status] || game.status}</div>
+                    </div>
+                `;
+                
+                gameCard.addEventListener('click', () => viewGameDetails(game.code));
+                gamesList.appendChild(gameCard);
+            });
+        }
+
+        // View game details
+        function viewGameDetails(gameCode) {
+            currentGameCode = gameCode;
+            socket.emit('admin-get-game-details', { gameCode });
+            
+            document.getElementById('dashboardPage').classList.add('hidden');
+            document.getElementById('gameDetailsPage').classList.remove('hidden');
+        }
+
+        // Receive game details
+        socket.on('admin-game-details', (game) => {
+            if (!isLoggedIn) return;
+            
+            displayGameDetails(game);
+        });
+
+        // Display game details
+        function displayGameDetails(game) {
+            const modeEmoji = {
+                'spicy': '🌶️',
+                'party': '🎉',
+                'cheeky': '😜',
+                'wheel': '🎡'
+            };
+
+            document.getElementById('gameDetailTitle').textContent = 
+                `${modeEmoji[game.mode] || '🎮'} Game ${game.code} - ${game.mode || 'No mode'}`;
+
+            // Current Status
+            let statusHTML = `<div style="font-size: 1.2rem; margin: 15px 0;">
+                Status: <strong>${game.status}</strong>
+            </div>`;
+
+            if (game.status === 'playing' && game.questions && game.questions[game.currentQuestionIndex]) {
+                const currentQ = game.questions[game.currentQuestionIndex];
+                statusHTML += `
+                    <div style="font-size: 1.5rem; margin: 20px 0; padding: 20px; background: rgba(108, 58, 237, 0.2); border-radius: 12px;">
+                        <strong>Question ${game.currentQuestionIndex + 1}/${game.questions.length}:</strong><br>
+                        "${currentQ}"
+                    </div>
+                `;
+
+                // Show voting options if available
+                if (game.currentVotingPlayers && game.currentVotingPlayers.length === 2) {
+                    statusHTML += `
+                        <div style="margin: 20px 0;">
+                            <strong>Voting Between:</strong><br>
+                            <div style="display: flex; gap: 20px; margin-top: 10px;">
+                                <div style="flex: 1; text-align: center;">
+                                    <img src="${game.currentVotingPlayers[0].photo}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                                    <div style="margin-top: 5px;">${game.currentVotingPlayers[0].name}</div>
+                                </div>
+                                <div style="align-self: center; font-size: 1.5rem;">VS</div>
+                                <div style="flex: 1; text-align: center;">
+                                    <img src="${game.currentVotingPlayers[1].photo}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                                    <div style="margin-top: 5px;">${game.currentVotingPlayers[1].name}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Show live votes
+                displayLiveVotes(game);
+                document.getElementById('liveVotesSection').style.display = 'block';
+                document.getElementById('wheelSubmissionsSection').style.display = 'none';
+            } else if (game.status === 'wheel-input' || game.status === 'wheel-ready') {
+                displayWheelSubmissions(game);
+                document.getElementById('wheelSubmissionsSection').style.display = 'block';
+                document.getElementById('liveVotesSection').style.display = 'none';
+            } else {
+                document.getElementById('liveVotesSection').style.display = 'none';
+                document.getElementById('wheelSubmissionsSection').style.display = 'none';
+            }
+
+            document.getElementById('currentStatusContent').innerHTML = statusHTML;
+
+            // Display players
+            displayPlayersList(game.players, game.adminId);
+
+            // Display question history
+            if (game.status === 'playing' && game.currentQuestionIndex > 0) {
+                displayQuestionHistory(game);
+                document.getElementById('questionHistorySection').style.display = 'block';
+            } else {
+                document.getElementById('questionHistorySection').style.display = 'none';
+            }
+        }
+
+        // Display live votes
+        function displayLiveVotes(game) {
+            const votesHTML = [];
+            const currentVotes = game.votes[game.currentQuestionIndex] || {};
+            
+            game.players.forEach(player => {
+                const hasVoted = currentVotes[player.id] !== undefined;
+                const votedFor = hasVoted ? game.players.find(p => p.id === currentVotes[player.id]) : null;
+                
+                votesHTML.push(`
+                    <div class="player-vote-row">
+                        <img src="${player.photo}" alt="${player.name}">
+                        <div style="flex: 1;">
+                            <strong>${player.name}</strong>
+                            ${hasVoted ? 
+                                `<span class="voted"> → ✅ Voted for ${votedFor?.name || 'Unknown'}</span>` : 
+                                `<span class="not-voted"> → ⏳ Not voted yet</span>`
+                            }
+                        </div>
+                    </div>
+                `);
+            });
+
+            document.getElementById('liveVotesContent').innerHTML = votesHTML.join('');
+        }
+
+        // Display wheel submissions
+        function displayWheelSubmissions(game) {
+            const submissions = game.wheelSubmissions || {};
+            const submissionsHTML = [];
+
+            game.players.forEach(player => {
+                const playerSubs = submissions[player.id];
+                
+                if (playerSubs) {
+                    let subsHTML = '';
+                    playerSubs.forEach(sub => {
+                        const emoji = {
+                            'dare': '💪',
+                            'personal': '🔍',
+                            'gossip': '💬',
+                            'secret': '🤫'
+                        };
+                        subsHTML += `
+                            <div class="wheel-prompt-answer">
+                                <strong>${emoji[sub.type]} ${sub.type.toUpperCase()}:</strong><br>
+                                "${sub.content}"
+                            </div>
+                        `;
+                    });
+
+                    submissionsHTML.push(`
+                        <div class="wheel-player-submission">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                <img src="${player.photo}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                <strong>${player.name}</strong>
+                                <span class="voted">✅ Submitted</span>
+                            </div>
+                            ${subsHTML}
+                        </div>
+                    `);
+                } else {
+                    submissionsHTML.push(`
+                        <div class="wheel-player-submission">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${player.photo}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                <strong>${player.name}</strong>
+                                <span class="not-voted">⏳ Not submitted yet</span>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+
+            document.getElementById('wheelSubmissionsContent').innerHTML = submissionsHTML.join('');
+        }
+
+        // Display players list
+        function displayPlayersList(players, adminId) {
+            const playersHTML = players.map(player => `
+                <div class="player-vote-row">
+                    <img src="${player.photo}" alt="${player.name}">
+                    <div style="flex: 1;">
+                        <strong>${player.name}</strong>
+                        <span style="margin-left: 10px; color: rgba(255,255,255,0.6);">
+                            ${player.gender === 'boy' ? '👦' : '👧'} ${player.gender}
+                        </span>
+                        ${player.id === adminId ? '<span style="margin-left: 10px;">⭐ Admin</span>' : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('playersListContent').innerHTML = playersHTML;
+        }
+
+        // Display question history
+        function displayQuestionHistory(game) {
+            const historyHTML = [];
+            
+            for (let i = 0; i < game.currentQuestionIndex; i++) {
+                const question = game.questions[i];
+                const votes = game.votes[i] || {};
+                const voteCounts = {};
+
+                // Count votes
+                Object.values(votes).forEach(votedForId => {
+                    voteCounts[votedForId] = (voteCounts[votedForId] || 0) + 1;
+                });
+
+                // Find winners
+                const sorted = Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);
+                const winnersHTML = sorted.slice(0, 2).map(([playerId, count]) => {
+                    const player = game.players.find(p => p.id === playerId);
+                    return player ? `${player.name}: ${count} votes` : '';
+                }).join(' vs ');
+
+                historyHTML.push(`
+                    <div class="question-history-item">
+                        <strong>Q${i + 1}:</strong> "${question}"<br>
+                        <span style="color: rgba(255,255,255,0.7);">${winnersHTML || 'No votes'}</span>
+                    </div>
+                `);
+            }
+
+            document.getElementById('questionHistoryContent').innerHTML = historyHTML.reverse().join('');
+        }
+
+        // Back to dashboard
+        document.getElementById('backToDashboard').addEventListener('click', () => {
+            currentGameCode = null;
+            document.getElementById('gameDetailsPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+            socket.emit('admin-auth', { password: ADMIN_PASSWORD });
+        });
+
+        // Auto-refresh game details if viewing
+        setInterval(() => {
+            if (isLoggedIn && currentGameCode) {
+                socket.emit('admin-get-game-details', { gameCode: currentGameCode });
+            }
+        }, 2000); // Refresh every 2 seconds
+    </script>
+</body>
+</html>
