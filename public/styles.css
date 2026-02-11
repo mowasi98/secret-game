@@ -1726,6 +1726,101 @@ body::after {
         width: 320px;
         height: 320px;
     }
+
+    /* Player voting cards mobile */
+    .player-vote-options {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .player-vote-card {
+        width: 100%;
+        max-width: 280px;
+        padding: 20px;
+    }
+
+    .player-vote-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .player-vote-name {
+        font-size: 1.1rem;
+    }
+
+    .vs-text {
+        font-size: 1.8rem;
+        margin: 10px 0;
+    }
+
+    /* Results mobile */
+    .result-players {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .result-player-card {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .result-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .result-name {
+        font-size: 1.1rem;
+    }
+
+    .result-percentage {
+        font-size: 2.2rem;
+    }
+
+    .result-count {
+        font-size: 1rem;
+    }
+
+    /* Voter grid mobile */
+    .voter-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .voter-item {
+        padding: 10px;
+    }
+
+    .voter-avatar {
+        width: 50px;
+        height: 50px;
+    }
+
+    .voter-name {
+        font-size: 0.85rem;
+    }
+
+    /* Crush page mobile */
+    #crushPage .text-bubble {
+        font-size: 1rem;
+        padding: 18px 22px;
+        margin-bottom: 12px;
+    }
+
+    #crushPage .text-bubble:first-child {
+        font-size: 1.5rem;
+    }
+
+    /* Wheel input mobile */
+    .glass-textarea {
+        font-size: 1.1rem;
+        padding: 18px 22px;
+        min-height: 120px;
+    }
+
+    .prompt-label {
+        font-size: 1.3rem;
+    }
 }
 
 /* Hide elements */

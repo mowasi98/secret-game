@@ -196,6 +196,99 @@
             border-radius: 8px;
             border-left: 3px solid #6c3aed;
         }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 15px;
+            }
+
+            .admin-title {
+                font-size: 1.8rem;
+            }
+
+            .game-card {
+                padding: 20px;
+            }
+
+            .game-pin {
+                font-size: 1.4rem;
+            }
+
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .info-badge {
+                font-size: 0.85rem;
+                padding: 6px 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .detail-section {
+                padding: 20px;
+            }
+
+            .detail-section h2 {
+                font-size: 1.3rem;
+            }
+
+            .player-vote-row {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px;
+            }
+
+            .player-vote-row img {
+                width: 35px;
+                height: 35px;
+            }
+
+            .login-box {
+                margin: 50px auto;
+                padding: 30px 20px;
+            }
+
+            .back-btn {
+                font-size: 0.9rem;
+                padding: 8px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-title {
+                font-size: 1.5rem;
+            }
+
+            .game-pin {
+                font-size: 1.2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-number {
+                font-size: 1.8rem;
+            }
+        }
     </style>
 </head>
 <body>
