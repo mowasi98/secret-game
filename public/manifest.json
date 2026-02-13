@@ -4,7 +4,7 @@
   "description": "Spicy party game with friends",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f0f1e",
+  "background_color": "#667eea",
   "theme_color": "#6c3aed",
   "orientation": "portrait",
   "icons": [
