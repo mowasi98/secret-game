@@ -104,28 +104,16 @@
                             </filter>
                         </defs>
                         <g transform="translate(200, 200)">
-                            <!-- Dare (Top-Right: 0-90°) -->
-                            <path d="M 0,-170 A 170,170 0 0,1 170,0 L 0,0 Z" fill="url(#dareGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
-                            <g transform="rotate(45)">
-                                <text x="0" y="-85" fill="white" font-size="22" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💪 DARE</text>
+                            <!-- DARE (Top Half: 0-180°) -->
+                            <path d="M 0,-170 A 170,170 0 0,1 170,0 A 170,170 0 0,1 0,170 L 0,0 Z" fill="url(#dareGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(90)">
+                                <text x="0" y="-85" fill="white" font-size="24" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💪 DARE</text>
                             </g>
                             
-                            <!-- Personal (Bottom-Right: 90-180°) -->
-                            <path d="M 170,0 A 170,170 0 0,1 0,170 L 0,0 Z" fill="url(#personalGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
-                            <g transform="rotate(135)">
-                                <text x="0" y="-75" fill="white" font-size="18" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">🔍 Q</text>
-                            </g>
-                            
-                            <!-- Gossip (Bottom-Left: 180-270°) -->
-                            <path d="M 0,170 A 170,170 0 0,1 -170,0 L 0,0 Z" fill="url(#gossipGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
-                            <g transform="rotate(225)">
-                                <text x="0" y="-85" fill="white" font-size="20" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💬 GOSSIP</text>
-                            </g>
-                            
-                            <!-- Secret (Top-Left: 270-360°) -->
-                            <path d="M -170,0 A 170,170 0 0,1 0,-170 L 0,0 Z" fill="url(#secretGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
-                            <g transform="rotate(315)">
-                                <text x="0" y="-85" fill="white" font-size="20" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">🤫 SECRET</text>
+                            <!-- GOSSIP (Bottom Half: 180-360°) -->
+                            <path d="M 0,170 A 170,170 0 0,1 -170,0 A 170,170 0 0,1 0,-170 L 0,0 Z" fill="url(#gossipGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(270)">
+                                <text x="0" y="-85" fill="white" font-size="24" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💬 GOSSIP</text>
                             </g>
                             
                             <!-- Center circle -->
@@ -390,9 +378,7 @@
             const wheelSubmissions = [];
             const wheelPrompts = [
                 { emoji: '💪', title: 'Dare', placeholder: 'Write a dare for someone...', type: 'dare' },
-                { emoji: '🔍', title: 'Personal Question', placeholder: 'Ask a personal question about someone...', type: 'personal' },
-                { emoji: '💬', title: 'Gossip', placeholder: 'Share some recent gossip...', type: 'gossip' },
-                { emoji: '🤫', title: 'Secret', placeholder: 'What\'s the deepest secret you know about someone?', type: 'secret' }
+                { emoji: '💬', title: 'Gossip', placeholder: 'Share some recent gossip...', type: 'gossip' }
             ];
 
             function showWheelPrompt() {

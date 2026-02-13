@@ -1136,18 +1136,16 @@ io.on('connection', (socket) => {
         game.wheelData.splice(randomIndex, 1);
 
         // Calculate exact rotation to land on the selected segment
-        // Pointer is at top (0°). Wheel segments: dare (0-90°), personal (90-180°), gossip (180-270°), secret (270-360°)
+        // Pointer is at top (0°). Wheel segments: dare (0-180°), gossip (180-360°)
         // To land under pointer, rotate wheel so segment center is at 0°
         const segmentAngles = {
-            dare: 315,     // Rotate 315° to bring dare (45° center) to top
-            personal: 225, // Rotate 225° to bring personal (135° center) to top
-            gossip: 135,   // Rotate 135° to bring gossip (225° center) to top
-            secret: 45     // Rotate 45° to bring secret (315° center) to top
+            dare: 270,     // Rotate 270° to bring dare (90° center) to top
+            gossip: 90     // Rotate 90° to bring gossip (270° center) to top
         };
         
         const targetAngle = segmentAngles[selectedItem.type];
         const fullRotations = 5; // 5 full spins before landing
-        const randomOffset = (Math.random() - 0.5) * 20; // Small random variation within segment
+        const randomOffset = (Math.random() - 0.5) * 40; // Random variation within segment
         const finalRotation = (fullRotations * 360) + targetAngle + randomOffset;
 
         // Broadcast spin with exact rotation to ALL players

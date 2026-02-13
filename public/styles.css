@@ -22,7 +22,7 @@ body, .sparkle, .logo, .center-emoji, .mode-emoji, .emoji {
 body {
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     min-height: 100vh;
-    background: linear-gradient(135deg, #5B86E5 0%, #667eea 25%, #764ba2 75%, #8E54E9 100%) !important;
+    background: linear-gradient(135deg, #2B3A67 0%, #3E4A74 25%, #4A3B6B 50%, #5D4B7C 75%, #6B4E8C 100%) !important;
     background-attachment: fixed !important;
     color: white;
     overflow-x: hidden;
@@ -2034,6 +2034,8 @@ body::after {
     .wheel-pointer {
         font-size: 3.8rem;
         top: -38px;
+        left: 50%;
+        transform: translateX(-50%);
     }
 }
 
@@ -2162,6 +2164,8 @@ body::after {
     .wheel-pointer {
         top: -35px;
         font-size: 3.5rem;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     /* Player voting cards mobile - side by side */
@@ -2343,6 +2347,8 @@ body::after {
     .wheel-pointer {
         font-size: 3.2rem;
         top: -32px;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     .players-circle {
