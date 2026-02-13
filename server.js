@@ -20,11 +20,11 @@ console.log('✅ Socket.io server configured');
 
 const PORT = process.env.PORT || 3000;
 
-// Serve static files with caching
+// Serve static files with minimal caching for instant updates
 app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: '1d', // Cache for 1 day
-    etag: true,
-    lastModified: true
+    maxAge: '0', // No cache - instant updates
+    etag: false,
+    lastModified: false
 }));
 app.use(express.json());
 
