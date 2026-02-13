@@ -20,6 +20,15 @@ console.log('✅ Socket.io server configured');
 
 const PORT = process.env.PORT || 3000;
 
+// Force no-cache headers for ALL responses
+app.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+    next();
+});
+
 // Serve static files with minimal caching for instant updates
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '0', // No cache - instant updates
