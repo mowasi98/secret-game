@@ -167,6 +167,13 @@
             box-shadow: 0 0 20px rgba(108, 58, 237, 0.6);
         }
 
+        .toggle-buttons-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
         .question-history {
             max-height: 400px;
             overflow-y: auto;
@@ -302,6 +309,17 @@
                 font-size: 0.9rem;
                 padding: 8px 16px;
             }
+
+            .toggle-section-btn {
+                font-size: 0.9rem;
+                padding: 10px 18px;
+                flex: 1 1 calc(50% - 5px);
+                min-width: 150px;
+            }
+
+            .toggle-buttons-container {
+                gap: 8px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -323,6 +341,18 @@
 
             .stat-number {
                 font-size: 1.8rem;
+            }
+
+            .toggle-section-btn {
+                font-size: 0.85rem;
+                padding: 10px 16px;
+                flex: 1 1 100%;
+                width: 100%;
+            }
+
+            .toggle-buttons-container {
+                flex-direction: column;
+                gap: 8px;
             }
         }
     </style>
@@ -417,7 +447,7 @@
                 </div>
 
                 <!-- Toggle Buttons for Sections -->
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                <div class="toggle-buttons-container">
                     <button class="toggle-section-btn" id="toggleVotesBtn" style="display: none;">
                         📊 View Live Votes
                     </button>
