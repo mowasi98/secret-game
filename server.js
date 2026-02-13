@@ -967,7 +967,13 @@ io.on('connection', (socket) => {
             }
             
             socket.join(gameCode);
-            socket.emit('game-joined', { game });
+            
+            // Send full game state including current voting players
+            const gameState = {
+                ...game,
+                currentVotingPlayers: game.currentVotingPlayers || []
+            };
+            socket.emit('game-joined', { game: gameState });
             io.to(gameCode).emit('player-joined', { player, players: game.players });
             console.log(`Admin ${player.name} rejoined game ${gameCode}`);
             broadcastToAdmins();
@@ -982,7 +988,13 @@ io.on('connection', (socket) => {
             );
             game.players[existingPlayerIndex] = player;
             socket.join(gameCode);
-            socket.emit('game-joined', { game });
+            
+            // Send full game state including current voting players
+            const gameState = {
+                ...game,
+                currentVotingPlayers: game.currentVotingPlayers || []
+            };
+            socket.emit('game-joined', { game: gameState });
             console.log(`${player.name} rejoined game ${gameCode}`);
             broadcastToAdmins();
             return;
@@ -1408,13 +1420,13 @@ io.on('connection', (socket) => {
             console.log(`Player ${playerData.name} marked as disconnected`);
         }
         
-        // Give players 10 SECONDS to reconnect
+        // Give players 30 SECONDS to reconnect (phone lock, etc)
         setTimeout(() => {
             const player = players.get(socket.id);
             
             // Only clean up if player never reconnected
             if (player && player.disconnectedAt) {
-                console.log(`Cleaning up player ${socket.id} after 10 sec timeout`);
+                console.log(`Cleaning up player ${socket.id} after 30 sec timeout`);
                 
                 // Remove player from games
                 for (const [gameCode, game] of games.entries()) {
@@ -1449,7 +1461,7 @@ io.on('connection', (socket) => {
                 // Remove from players map
                 players.delete(socket.id);
             }
-        }, 10000); // 10 SECOND grace period (10000ms)
+        }, 30000); // 30 SECOND grace period (30000ms)
     });
 });
 

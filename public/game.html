@@ -283,7 +283,10 @@
             if (!document.hidden && socket.connected) {
                 // Page came back to foreground, rejoin game to sync
                 console.log('Page visible again, resyncing...');
-                socket.emit('join-game', { gameCode, player: profile });
+                socket.emit('join-game', { gameCode });
+                
+                // Request current game state
+                socket.emit('request-game-state', { gameCode });
             }
         });
         const gameCode = localStorage.getItem('currentGameCode');
@@ -597,11 +600,45 @@
             playTickSound();
         });
 
-        // Handle game join response
+        // Handle game join response (including rejoin after phone lock)
         socket.on('game-joined', (data) => {
             console.log('Joined game successfully:', data);
             currentGame = data.game;
             isAdmin = data.game.adminId === socket.id;
+            
+            // If rejoining an active game, resync the UI
+            if (data.game.status === 'playing' && data.game.questions && data.game.currentQuestionIndex >= 0) {
+                const currentQ = data.game.questions[data.game.currentQuestionIndex];
+                const isAnonymous = !currentQ.isPublic;
+                
+                // Find the two players being voted on
+                if (data.game.currentVotingPlayers && data.game.currentVotingPlayers.length === 2) {
+                    const player1 = data.game.currentVotingPlayers[0];
+                    const player2 = data.game.currentVotingPlayers[1];
+                    
+                    // Display the current question
+                    displayQuestion({
+                        mode: data.game.mode,
+                        question: currentQ.text || currentQ,
+                        questionNumber: data.game.currentQuestionIndex + 1,
+                        totalQuestions: data.game.questions.length,
+                        isAnonymous: isAnonymous,
+                        players: [player1, player2]
+                    });
+                    
+                    // Check if this player already voted
+                    const currentVotes = data.game.votes[data.game.currentQuestionIndex] || {};
+                    if (currentVotes[socket.id]) {
+                        hasVoted = true;
+                        document.getElementById('playerOption1').style.pointerEvents = 'none';
+                        document.getElementById('playerOption2').style.pointerEvents = 'none';
+                        document.getElementById('playerOption1').style.opacity = '0.5';
+                        document.getElementById('playerOption2').style.opacity = '0.5';
+                    }
+                    
+                    console.log('✅ Resynced to current question after reconnect');
+                }
+            }
         });
 
         // Load game start data from localStorage after listeners are set up
