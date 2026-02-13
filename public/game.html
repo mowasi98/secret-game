@@ -595,7 +595,7 @@
 
         // Vote progress updates
         socket.on('vote-progress', (data) => {
-            console.log('Vote progress received:', data);
+            console.log('📊 Vote progress received:', data);
             
             // ONLY update if waiting page is actually visible (not during results)
             const waitingPage = document.getElementById('waitingPage');
@@ -603,8 +603,12 @@
                 document.getElementById('waitingProgress').textContent = 
                     `${data.voted}/${data.total} voted`;
                 
+                console.log(`✅ Updated progress: ${data.voted}/${data.total}`);
+                
                 // Play a subtle tick sound for each vote
                 playTickSound();
+            } else {
+                console.log('⚠️ Waiting page hidden, skipping progress update');
             }
         });
 
@@ -736,6 +740,8 @@
 
         // Vote results
         socket.on('vote-results', (data) => {
+            console.log('✅ RESULTS RECEIVED:', data);
+            
             // Hide ALL other pages first
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             
@@ -744,10 +750,14 @@
             waitingPage.classList.add('hidden');
             waitingPage.style.display = 'none'; // Extra safeguard
             
+            console.log('✅ Waiting page hidden, showing results...');
+            
             document.getElementById('waitingText').textContent = 'Waiting for everyone else...'; // Reset for next time
             
             // Show results
-            document.getElementById('resultsPage').classList.remove('hidden');
+            const resultsPage = document.getElementById('resultsPage');
+            resultsPage.classList.remove('hidden');
+            console.log('✅ Results page should be visible now');
 
             // Play success sound
             playSuccessSound();

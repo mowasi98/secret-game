@@ -1198,7 +1198,11 @@ io.on('connection', (socket) => {
         // Check if all voted
         const allVoted = game.players.every(p => game.votes[currentQ][p.id] !== undefined);
 
+        console.log(`📊 Vote check for game ${gameCode}: ${votedCount}/${totalPlayers} voted, allVoted=${allVoted}`);
+
         if (allVoted) {
+            console.log(`✅ ALL VOTED! Sending results for game ${gameCode}...`);
+            
             // Calculate results
             const votes = game.votes[currentQ];
             const voteCounts = {};
@@ -1223,6 +1227,8 @@ io.on('connection', (socket) => {
             // Check if this question is public or anonymous
             const currentQuestion = game.questions[currentQ];
             const isAnonymous = !currentQuestion.isPublic;
+
+            console.log(`🎯 Emitting vote-results to game ${gameCode}:`, { voteCounts, isAnonymous });
 
             io.to(gameCode).emit('vote-results', {
                 voteCounts,
