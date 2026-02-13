@@ -2038,9 +2038,7 @@ body::after {
     /* About button and popup on mobile */
     .about-btn {
         bottom: 10px;
-        left: 50%;
-        margin-left: -80px; /* Half of approximate button width for centering */
-        transform: none;
+        left: 10px;
         padding: 10px 16px;
         font-size: 0.75rem;
         border-radius: 15px;
