@@ -954,6 +954,18 @@ io.on('connection', (socket) => {
             return;
         }
 
+        // Check if player was kicked (not in game.players anymore)
+        const existingPlayerIndex = game.players.findIndex(p => 
+            p.name === player.name && p.photo === player.photo
+        );
+        
+        // If game is active and player is NOT in the list, they were kicked
+        if ((game.status === 'playing' || game.status === 'wheel-input' || game.status === 'wheel-ready') && existingPlayerIndex === -1) {
+            console.log(`Player ${player.name} was kicked from game ${gameCode}`);
+            socket.emit('error', '🚫 You were kicked from the game due to inactivity. Please wait until the current game finishes to rejoin.');
+            return;
+        }
+
         // Clear disconnection flag if player is reconnecting
         if (player.disconnectedAt) {
             delete player.disconnectedAt;

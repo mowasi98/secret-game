@@ -1192,12 +1192,15 @@ body::after {
     animation: bounce 1s ease-in-out infinite;
     font-weight: 900;
     z-index: 5;
-    pointer-events: none; /* Don't block clicks */
+    pointer-events: none;
     display: block;
     width: 0;
     height: 0;
     text-align: center;
     z-index: 100;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
 }
 
 @keyframes bounce {
