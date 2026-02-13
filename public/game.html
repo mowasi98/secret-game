@@ -70,7 +70,7 @@
             </div>
 
             <div class="wheel-container">
-                <div class="wheel-pointer">▼</div>
+                <div class="wheel-pointer" style="left: 50%; transform: translateX(-50%);">▼</div>
                 <div class="wheel" id="wheel">
                     <svg width="100%" height="100%" viewBox="0 0 400 400">
                         <defs>
@@ -639,6 +639,19 @@
                     
                     console.log('✅ Resynced to current question after reconnect');
                 }
+            }
+            
+            // If rejoining wheel mode, sync to current wheel state
+            if ((data.game.status === 'wheel-ready' || data.game.status === 'wheel-input') && data.game.currentWheelRotation) {
+                console.log('🎡 Syncing to wheel rotation:', data.game.currentWheelRotation);
+                document.getElementById('waitingPage').classList.add('hidden');
+                document.getElementById('wheelSpinPage').classList.remove('hidden');
+                
+                // Apply current rotation
+                const wheel = document.getElementById('wheel');
+                wheel.style.transform = `rotate(${data.game.currentWheelRotation}deg)`;
+                
+                console.log('✅ Resynced to current wheel after reconnect');
             }
         });
 

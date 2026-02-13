@@ -1169,6 +1169,9 @@ io.on('connection', (socket) => {
         const randomOffset = (Math.random() - 0.5) * 40; // Random variation within segment
         const finalRotation = (fullRotations * 360) + targetAngle + randomOffset;
 
+        // Store current rotation for reconnecting players
+        game.currentWheelRotation = finalRotation;
+
         // Broadcast spin with exact rotation to ALL players
         io.to(gameCode).emit('wheel-spinning', {
             rotation: finalRotation
