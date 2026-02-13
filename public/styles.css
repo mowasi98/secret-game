@@ -2037,22 +2037,48 @@ body::after {
 
     /* About button and popup on mobile */
     .about-btn {
-        bottom: 10px;
-        left: 10px;
+        bottom: 10px !important;
+        left: 10px !important;
+        right: auto !important;
+        transform: none !important;
+        margin: 0 !important;
         padding: 10px 16px;
         font-size: 0.75rem;
         border-radius: 15px;
     }
 
     .about-btn:hover {
-        transform: translateY(-2px) scale(1.02);
+        transform: translateY(-2px) scale(1.02) !important;
     }
 
     .about-popup {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        right: auto !important;
+        bottom: auto !important;
+        margin: 0 !important;
         max-width: 90vw;
+        width: 90vw;
         padding: 24px 20px;
         font-size: 0.75rem;
         border-radius: 20px;
+    }
+    
+    .about-popup:not(.hidden) {
+        animation: slideInUpFancyMobile 0.3s ease-out !important;
+    }
+    
+    @keyframes slideInUpFancyMobile {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
     }
 
     .about-popup div[style*="font-size: 1.3rem"] {
