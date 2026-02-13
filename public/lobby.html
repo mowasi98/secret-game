@@ -176,28 +176,26 @@
 
             // Match CSS circle dimensions EXACTLY
             const isMobile = window.innerWidth <= 600;
-            // Circle dimensions from CSS
-            const circleDiameter = isMobile ? 280 : 340;
-            const centerX = circleDiameter / 2;
-            const centerY = circleDiameter / 2;
             
-            // Avatar size from CSS
+            // Circle and avatar dimensions from CSS
+            const circleDiameter = isMobile ? 280 : 340;
             const avatarSize = isMobile ? 70 : 75;
             
-            // Place avatars ON the edge of the circle
-            // Radius should account for the avatar size to keep them on the edge
-            const radius = (circleDiameter / 2) - (avatarSize / 2) - 5; // -5px padding from edge
+            // Calculate radius to place avatars on the edge
+            const radius = (circleDiameter - avatarSize) / 2 - 8; // -8px for border and spacing
 
             players.forEach((player, index) => {
+                // Start from top (-90 degrees) and go clockwise
                 const angle = (index / players.length) * 2 * Math.PI - Math.PI / 2;
-                const x = centerX + radius * Math.cos(angle);
-                const y = centerY + radius * Math.sin(angle);
+                const x = radius * Math.cos(angle);
+                const y = radius * Math.sin(angle);
 
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'player-item';
-                // Center the avatar on the calculated position
-                playerDiv.style.left = `${x - (avatarSize / 2)}px`;
-                playerDiv.style.top = `${y - (avatarSize / 2)}px`;
+                // Use transform for better positioning
+                playerDiv.style.left = '50%';
+                playerDiv.style.top = '50%';
+                playerDiv.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
 
                 const isPlayerAdmin = player.id === currentGame?.adminId;
                 const isCurrentUser = player.id === socket.id;
