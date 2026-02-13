@@ -1741,15 +1741,15 @@ body::after {
 @keyframes slideInUpFancy {
     0% {
         opacity: 0;
-        transform: translateY(30px) scale(0.95);
+        transform: translate(-50%, -50%) translateY(30px) scale(0.95);
     }
     60% {
         opacity: 1;
-        transform: translateY(-5px) scale(1.01);
+        transform: translate(-50%, -50%) translateY(-5px) scale(1.01);
     }
     100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translate(-50%, -50%) translateY(0) scale(1);
     }
 }
 
@@ -1884,14 +1884,7 @@ body::after {
     }
 }
 
-@keyframes bounce {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-}
+/* Removed duplicate bounce keyframe - using the one with translateX(-50%) for wheel-pointer */
 
 /* Responsive */
 @media (max-width: 600px) {

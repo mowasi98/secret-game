@@ -41,6 +41,24 @@ app.get('/health', (req, res) => {
 // Game state storage
 const games = new Map(); // gameCode -> game data
 const players = new Map(); // socketId -> player data
+const adminSockets = new Set(); // Set of admin socket IDs
+
+// Helper function to broadcast game updates to all admins
+function broadcastToAdmins() {
+    const gamesArray = Array.from(games.values()).map(game => ({
+        code: game.code,
+        mode: game.mode,
+        status: game.status,
+        players: game.players,
+        adminId: game.adminId,
+        currentQuestionIndex: game.currentQuestionIndex,
+        questions: game.questions
+    }));
+    
+    adminSockets.forEach(adminSocketId => {
+        io.to(adminSocketId).emit('admin-games-data', { games: gamesArray });
+    });
+}
 
 // Question banks (20+ questions per mode, randomized each game)
 const questionBanks = {
@@ -898,6 +916,9 @@ io.on('connection', (socket) => {
         socket.join(gameCode);
         socket.emit('game-created', { gameCode, game });
         console.log(`Game created: ${gameCode} by ${creator.name}`);
+        
+        // Notify admins
+        broadcastToAdmins();
     });
 
     // Join game
@@ -949,6 +970,7 @@ io.on('connection', (socket) => {
             socket.emit('game-joined', { game });
             io.to(gameCode).emit('player-joined', { player, players: game.players });
             console.log(`Admin ${player.name} rejoined game ${gameCode}`);
+            broadcastToAdmins();
             return;
         }
 
@@ -962,6 +984,7 @@ io.on('connection', (socket) => {
             socket.join(gameCode);
             socket.emit('game-joined', { game });
             console.log(`${player.name} rejoined game ${gameCode}`);
+            broadcastToAdmins();
             return;
         }
 
@@ -977,6 +1000,9 @@ io.on('connection', (socket) => {
         io.to(gameCode).emit('player-joined', { player, players: game.players });
         socket.emit('game-joined', { game });
         console.log(`${player.name} joined game ${gameCode}`);
+        
+        // Notify admins
+        broadcastToAdmins();
     });
 
     // Select game mode (admin only)
@@ -1037,6 +1063,9 @@ io.on('connection', (socket) => {
         }
 
         console.log(`Game ${gameCode} mode set to:`, mode);
+        
+        // Notify admins
+        broadcastToAdmins();
     });
 
     // Submit wheel inputs
@@ -1079,6 +1108,7 @@ io.on('connection', (socket) => {
 
         if (game.wheelData.length === 0) {
             io.to(gameCode).emit('game-finished');
+            broadcastToAdmins();
             return;
         }
 
@@ -1222,6 +1252,7 @@ io.on('connection', (socket) => {
             // No crush question - go straight to finished
             game.status = 'finished';
             io.to(gameCode).emit('game-finished');
+            broadcastToAdmins();
             return;
         }
 
@@ -1271,6 +1302,7 @@ io.on('connection', (socket) => {
             console.log(`All players voted on crush question for game ${gameCode}`);
             game.status = 'finished';
             io.to(gameCode).emit('game-finished');
+            broadcastToAdmins();
         }
     });
 
@@ -1304,7 +1336,10 @@ io.on('connection', (socket) => {
         const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'wasishah98';
         
         if (data.password === ADMIN_PASSWORD) {
-            console.log('Admin authenticated:', socket.id);
+            console.log('✅ Admin authenticated:', socket.id);
+            
+            // Add to admin sockets set
+            adminSockets.add(socket.id);
             
             // Send all games data
             const gamesArray = Array.from(games.values()).map(game => ({
@@ -1318,6 +1353,9 @@ io.on('connection', (socket) => {
             }));
             
             socket.emit('admin-games-data', { games: gamesArray });
+            console.log(`📊 Sent ${gamesArray.length} games to admin`);
+        } else {
+            console.log('❌ Failed admin auth attempt:', socket.id);
         }
     });
 
@@ -1356,6 +1394,12 @@ io.on('connection', (socket) => {
     // Disconnect
     socket.on('disconnect', () => {
         console.log('Player disconnected:', socket.id);
+        
+        // Remove from admin sockets if applicable
+        if (adminSockets.has(socket.id)) {
+            adminSockets.delete(socket.id);
+            console.log('Admin disconnected:', socket.id);
+        }
         
         // Mark player as disconnected but keep their data for reconnection
         const playerData = players.get(socket.id);
@@ -1396,6 +1440,9 @@ io.on('connection', (socket) => {
                             console.log(`Deleting empty game after timeout: ${gameCode}`);
                             games.delete(gameCode);
                         }
+                        
+                        // Notify admins of changes
+                        broadcastToAdmins();
                     }
                 }
                 
