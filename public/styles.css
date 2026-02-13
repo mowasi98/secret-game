@@ -7,9 +7,16 @@
     box-sizing: border-box;
 }
 
-/* Force Apple-style emojis */
+/* Force consistent emoji rendering across all devices */
 body, .sparkle, .logo, .center-emoji, .mode-emoji, .emoji {
     font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'Segoe UI Symbol', sans-serif;
+}
+
+/* Ensure emojis don't resize differently on different browsers */
+.sparkle, .center-emoji, .mode-emoji, .emoji {
+    display: inline-block;
+    line-height: 1;
+    vertical-align: middle;
 }
 
 body {
@@ -24,7 +31,12 @@ body {
     color: white;
     overflow-x: hidden;
     position: relative;
-}
+    /* Consistent text rendering across all devices */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
 
 /* Text should use Poppins, emojis should use Apple Color Emoji */
 body * {
@@ -921,6 +933,11 @@ body::after {
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
     position: relative;
     overflow: hidden;
+    /* Better touch handling on mobile for consistent button behavior */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .mode-card::before {
@@ -1892,7 +1909,24 @@ body::after {
 
 /* Removed duplicate bounce keyframe - using the one with translateX(-50%) for wheel-pointer */
 
-/* Responsive */
+/* Responsive - Tablet and Mobile */
+@media (max-width: 768px) {
+    .container {
+        padding: 25px 18px;
+    }
+
+    .wheel-container {
+        width: 360px;
+        height: 360px;
+    }
+
+    .wheel-pointer {
+        font-size: 3.8rem;
+        top: -38px;
+    }
+}
+
+/* Responsive - Mobile */
 @media (max-width: 600px) {
     .container {
         padding: 20px 15px;
@@ -2177,6 +2211,45 @@ body::after {
 
     .prompt-label {
         font-size: 1.3rem;
+    }
+}
+
+/* Responsive - Small phones */
+@media (max-width: 400px) {
+    .logo > div:first-child {
+        font-size: 5rem;
+    }
+
+    .logo-text {
+        font-size: 2.8rem;
+    }
+
+    .wheel-container {
+        width: 300px;
+        height: 300px;
+    }
+
+    .wheel-pointer {
+        font-size: 3.2rem;
+        top: -32px;
+    }
+
+    .players-circle {
+        width: 260px;
+        height: 260px;
+    }
+
+    .player-avatar {
+        width: 65px;
+        height: 65px;
+    }
+
+    .close-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.8rem;
+        top: 20px;
+        left: 20px;
     }
 }
 
