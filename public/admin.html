@@ -631,6 +631,15 @@
         socket.on('admin-game-details', (game) => {
             if (!isLoggedIn) return;
             
+            console.log('📊 Admin received game details:', {
+                code: game.code,
+                status: game.status,
+                currentQuestionIndex: game.currentQuestionIndex,
+                playersCount: game.players?.length,
+                votesCount: Object.keys(game.votes?.[game.currentQuestionIndex] || {}).length,
+                currentVotingPlayers: game.currentVotingPlayers
+            });
+            
             displayGameDetails(game);
         });
 
@@ -721,16 +730,26 @@
             const isPublic = currentQuestion?.isPublic === true;
             const questionType = isPublic ? '🌐 Public' : '🔒 Anonymous';
             
-            // Show question type badge
+            // Show question type badge (ADMIN SEES ALL VOTES - anonymous or public)
             votesHTML.push(`
                 <div style="background: rgba(108, 58, 237, 0.2); padding: 10px 15px; border-radius: 10px; margin-bottom: 15px; font-weight: 600;">
-                    ${questionType}
+                    ${questionType} <span style="color: #ffd700; font-size: 0.85rem;">(Admin View: All votes visible)</span>
                 </div>
             `);
             
+            // Debug: Log vote data
+            console.log('Current votes:', currentVotes);
+            console.log('Game players:', game.players.map(p => ({ id: p.id, name: p.name })));
+            
             game.players.forEach(player => {
                 const hasVoted = currentVotes[player.id] !== undefined;
-                const votedFor = hasVoted ? game.players.find(p => p.id === currentVotes[player.id]) : null;
+                const voteTargetId = currentVotes[player.id];
+                const votedFor = hasVoted ? game.players.find(p => p.id === voteTargetId) : null;
+                
+                // Debug output if vote target not found
+                if (hasVoted && !votedFor) {
+                    console.warn(`⚠️ Vote target not found for ${player.name}. Target ID: ${voteTargetId}`);
+                }
                 
                 votesHTML.push(`
                     <div class="player-vote-row">
@@ -738,7 +757,7 @@
                         <div style="flex: 1;">
                             <strong>${player.name}</strong>
                             ${hasVoted ? 
-                                `<span class="voted"> → ✅ Voted for ${votedFor?.name || 'Unknown'}</span>` : 
+                                `<span class="voted"> → ✅ Voted for <strong>${votedFor?.name || `[ID: ${voteTargetId}]`}</strong></span>` : 
                                 `<span class="not-voted"> → ⏳ Not voted yet</span>`
                             }
                         </div>
@@ -753,6 +772,13 @@
         function displayWheelSubmissions(game) {
             const submissions = game.wheelSubmissions || {};
             const submissionsHTML = [];
+
+            // ADMIN: Show header
+            submissionsHTML.push(`
+                <div style="background: rgba(108, 58, 237, 0.2); padding: 10px 15px; border-radius: 10px; margin-bottom: 15px; font-weight: 600;">
+                    🎡 Spin the Wheel Submissions <span style="color: #ffd700; font-size: 0.85rem;">(Admin View: All submissions visible)</span>
+                </div>
+            `);
 
             game.players.forEach(player => {
                 const playerSubs = submissions[player.id];
@@ -824,6 +850,9 @@
             
             for (let i = 0; i < game.currentQuestionIndex; i++) {
                 const question = game.questions[i];
+                const questionData = game.questions[i];
+                const isPublic = typeof questionData === 'object' ? questionData.isPublic : false;
+                const questionText = typeof questionData === 'object' ? questionData.text : questionData;
                 const votes = game.votes[i] || {};
                 const voteCounts = {};
 
@@ -839,10 +868,23 @@
                     return player ? `${player.name}: ${count} votes` : '';
                 }).join(' vs ');
 
+                // ADMIN: Show all individual votes (who voted for whom)
+                const detailVotesHTML = [];
+                Object.entries(votes).forEach(([voterId, targetId]) => {
+                    const voter = game.players.find(p => p.id === voterId);
+                    const target = game.players.find(p => p.id === targetId);
+                    if (voter && target) {
+                        detailVotesHTML.push(`<span style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">${voter.name} → ${target.name}</span>`);
+                    }
+                });
+
+                const typeIndicator = isPublic ? '🌐' : '🔒';
+
                 historyHTML.push(`
                     <div class="question-history-item">
-                        <strong>Q${i + 1}:</strong> "${question}"<br>
+                        <strong>${typeIndicator} Q${i + 1}:</strong> "${questionText}"<br>
                         <span style="color: rgba(255,255,255,0.7);">${winnersHTML || 'No votes'}</span>
+                        ${detailVotesHTML.length > 0 ? `<br><div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;">${detailVotesHTML.join(', ')}</div>` : ''}
                     </div>
                 `);
             }
