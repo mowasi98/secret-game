@@ -432,7 +432,10 @@
                     socket.emit('submit-wheel-inputs', { gameCode, submissions: wheelSubmissions });
                     
                     document.getElementById('wheelInputPage').classList.add('hidden');
-                    document.getElementById('waitingPage').classList.remove('hidden');
+                    
+                    const waitingPage = document.getElementById('waitingPage');
+                    waitingPage.classList.remove('hidden');
+                    waitingPage.style.display = ''; // Clear inline style
                 }
             });
 
@@ -593,11 +596,16 @@
         // Vote progress updates
         socket.on('vote-progress', (data) => {
             console.log('Vote progress received:', data);
-            document.getElementById('waitingProgress').textContent = 
-                `${data.voted}/${data.total} voted`;
             
-            // Play a subtle tick sound for each vote
-            playTickSound();
+            // ONLY update if waiting page is actually visible (not during results)
+            const waitingPage = document.getElementById('waitingPage');
+            if (!waitingPage.classList.contains('hidden')) {
+                document.getElementById('waitingProgress').textContent = 
+                    `${data.voted}/${data.total} voted`;
+                
+                // Play a subtle tick sound for each vote
+                playTickSound();
+            }
         });
 
         // Handle game join response (including rejoin after phone lock)
@@ -716,7 +724,11 @@
             
             setTimeout(() => {
                 document.getElementById('confirmationPage').classList.add('hidden');
-                document.getElementById('waitingPage').classList.remove('hidden');
+                
+                const waitingPage = document.getElementById('waitingPage');
+                waitingPage.classList.remove('hidden');
+                waitingPage.style.display = ''; // Clear inline style
+                
                 document.getElementById('waitingText').textContent = 'Waiting for everyone else...';
                 // The vote-progress event from server will update the counter
             }, 3000);
@@ -726,7 +738,12 @@
         socket.on('vote-results', (data) => {
             // Hide ALL other pages first
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            document.getElementById('waitingPage').classList.add('hidden');
+            
+            // FORCE hide waiting page (with extra safeguard)
+            const waitingPage = document.getElementById('waitingPage');
+            waitingPage.classList.add('hidden');
+            waitingPage.style.display = 'none'; // Extra safeguard
+            
             document.getElementById('waitingText').textContent = 'Waiting for everyone else...'; // Reset for next time
             
             // Show results
@@ -846,7 +863,11 @@
                 
                 // Show waiting
                 document.getElementById('crushPage').classList.add('hidden');
-                document.getElementById('waitingPage').classList.remove('hidden');
+                
+                const waitingPage = document.getElementById('waitingPage');
+                waitingPage.classList.remove('hidden');
+                waitingPage.style.display = ''; // Clear inline style
+                
                 document.getElementById('waitingText').textContent = 'Waiting for everyone to vote...';
             };
         });
