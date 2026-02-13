@@ -28,8 +28,12 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 app.use(express.json());
 
-// Admin panel route
+// Admin panel routes (both /admin and /admin.html work)
 app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/admin.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 

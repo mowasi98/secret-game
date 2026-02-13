@@ -1063,6 +1063,12 @@ body::after {
             drop-shadow(0 5px 15px rgba(0, 0, 0, 0.7));
     animation: bounce 1s ease-in-out infinite;
     font-weight: 900;
+    z-index: 5;
+    pointer-events: none; /* Don't block clicks */
+    display: block;
+    width: 0;
+    height: 0;
+    text-align: center;
     z-index: 100;
 }
 
@@ -1422,7 +1428,7 @@ body::after {
 .close-btn {
     position: absolute;
     top: 25px;
-    right: 25px;
+    left: 25px;  /* Changed from right to left */
     width: 50px;
     height: 50px;
     font-size: 2rem;
@@ -2006,6 +2012,11 @@ body::after {
     .wheel-container {
         width: 320px;
         height: 320px;
+    }
+
+    .wheel-pointer {
+        top: -35px;
+        font-size: 3.5rem;
     }
 
     /* Player voting cards mobile - side by side */
