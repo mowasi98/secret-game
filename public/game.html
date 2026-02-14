@@ -260,10 +260,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // VERSION CHECK - Look for this in console (F12)
-        const APP_VERSION = 'v2.8.1';
+        const APP_VERSION = 'v2.8.2';
         console.log('%c🎮 SECRET GAME LOADED', 'color: #6c3aed; font-size: 20px; font-weight: bold;');
         console.log('%cVersion: ' + APP_VERSION, 'color: #2d5cf6; font-size: 16px; font-weight: bold;');
-        console.log('%cLast Update: Nuclear hide waiting page + 1sec confirmation delay', 'color: #999; font-size: 12px;');
+        console.log('%cLast Update: FIX - Clear inline styles when showing pages', 'color: #999; font-size: 12px;');
         console.log('-----------------------------------');
         
         const socket = io();
@@ -455,7 +455,10 @@
             waitingPage.classList.add('hidden');
             waitingPage.style.display = 'none';
             
-            document.getElementById('wheelSpinPage').classList.remove('hidden');
+            // Show wheel page (clear inline styles)
+            const wheelPage = document.getElementById('wheelSpinPage');
+            wheelPage.classList.remove('hidden');
+            wheelPage.style.display = 'block';
             
             // Admin can spin
             if (isAdmin) {
@@ -582,8 +585,10 @@
             // Clear results status text
             document.getElementById('resultsStatusText').textContent = '';
             
-            // Show question page
-            document.getElementById('questionPage').classList.remove('hidden');
+            // Show question page (clear inline styles)
+            const questionPage = document.getElementById('questionPage');
+            questionPage.classList.remove('hidden');
+            questionPage.style.display = 'block';
             displayQuestion(data);
         });
 
@@ -603,8 +608,10 @@
             // Clear results status text
             document.getElementById('resultsStatusText').textContent = '';
             
-            // Show question page
-            document.getElementById('questionPage').classList.remove('hidden');
+            // Show question page (clear inline styles from nuclear hide)
+            const questionPage = document.getElementById('questionPage');
+            questionPage.classList.remove('hidden');
+            questionPage.style.display = 'block';
             displayQuestion(data);
         });
 
@@ -916,7 +923,11 @@
             waitingPage.style.display = 'none';
             
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            document.getElementById('crushPage').classList.remove('hidden');
+            
+            // Show crush page (clear inline styles)
+            const crushPage = document.getElementById('crushPage');
+            crushPage.classList.remove('hidden');
+            crushPage.style.display = 'block';
 
             const crushOptions = document.getElementById('crushOptions');
             crushOptions.innerHTML = '';
