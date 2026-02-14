@@ -72,6 +72,29 @@
         </div>
     </div>
 
+    <!-- Photo Crop Modal -->
+    <div class="crop-modal hidden" id="cropModal">
+        <div class="crop-container">
+            <h2 style="color: white; margin-bottom: 20px; text-align: center;">Adjust Your Photo</h2>
+            
+            <div class="crop-canvas-wrapper">
+                <canvas id="cropCanvas"></canvas>
+                <div class="crop-circle-overlay"></div>
+            </div>
+
+            <div class="crop-zoom-controls">
+                <button class="zoom-btn" id="zoomOut">−</button>
+                <input type="range" id="zoomSlider" min="100" max="300" value="100" step="1">
+                <button class="zoom-btn" id="zoomIn">+</button>
+            </div>
+
+            <div class="crop-buttons">
+                <button class="glass-btn" id="cancelCrop" style="background: rgba(255,255,255,0.15);">Cancel</button>
+                <button class="glass-btn" id="saveCrop">Save Photo</button>
+            </div>
+        </div>
+    </div>
+
     <!-- About Button (bottom left) -->
     <button class="about-btn" id="aboutBtn">
         ℹ️ What's this game about?
@@ -125,59 +148,187 @@
             document.getElementById('profileSetup').classList.remove('hidden');
         }, 2000);
 
-        // Photo upload
+        // Photo upload with circular cropper
         const photoInput = document.getElementById('photoInput');
         const profilePreview = document.getElementById('profilePreview');
         const cameraIcon = document.getElementById('cameraIcon');
 
+        // Photo Cropper Variables
+        let cropperImage = null;
+        let cropCanvas = null;
+        let cropCtx = null;
+        let imageX = 0;
+        let imageY = 0;
+        let imageScale = 1;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let canvasSize = 0;
+        
         photoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                // Compress image before storing
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        // Create canvas for compression
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Max dimensions (smaller = faster)
-                        const maxSize = 400;
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        // Calculate new dimensions
-                        if (width > height) {
-                            if (width > maxSize) {
-                                height = (height * maxSize) / width;
-                                width = maxSize;
-                            }
-                        } else {
-                            if (height > maxSize) {
-                                width = (width * maxSize) / height;
-                                height = maxSize;
-                            }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // Compress to 70% quality
-                        const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
-                        
-                        profileData.photo = compressedImage;
-                        profilePreview.src = compressedImage;
-                        profilePreview.style.display = 'block';
-                        cameraIcon.style.display = 'none';
-                        checkFormComplete();
+                reader.onload = function(e) {
+                    cropperImage = new Image();
+                    cropperImage.onload = function() {
+                        openCropper();
                     };
-                    img.src = e.target.result;
+                    cropperImage.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }
         });
+
+        function openCropper() {
+            document.getElementById('cropModal').classList.remove('hidden');
+            
+            cropCanvas = document.getElementById('cropCanvas');
+            cropCtx = cropCanvas.getContext('2d');
+            
+            const isMobile = window.innerWidth <= 768;
+            canvasSize = isMobile ? Math.min(window.innerWidth * 0.75, 350) : 400;
+            cropCanvas.width = canvasSize;
+            cropCanvas.height = canvasSize;
+            
+            const imgAspect = cropperImage.width / cropperImage.height;
+            if (imgAspect > 1) {
+                imageScale = canvasSize / cropperImage.height;
+            } else {
+                imageScale = canvasSize / cropperImage.width;
+            }
+            
+            imageX = (canvasSize - cropperImage.width * imageScale) / 2;
+            imageY = (canvasSize - cropperImage.height * imageScale) / 2;
+            
+            document.getElementById('zoomSlider').value = 100;
+            drawCropper();
+            setupCropperControls();
+        }
+
+        function drawCropper() {
+            cropCtx.clearRect(0, 0, canvasSize, canvasSize);
+            cropCtx.drawImage(cropperImage, imageX, imageY, cropperImage.width * imageScale, cropperImage.height * imageScale);
+            cropCtx.globalCompositeOperation = 'destination-over';
+            cropCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            cropCtx.fillRect(0, 0, canvasSize, canvasSize);
+            cropCtx.globalCompositeOperation = 'destination-out';
+            cropCtx.beginPath();
+            cropCtx.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - 20, 0, Math.PI * 2);
+            cropCtx.fill();
+            cropCtx.globalCompositeOperation = 'source-over';
+        }
+
+        function setupCropperControls() {
+            let lastTouchDistance = 0;
+            
+            cropCanvas.addEventListener('mousedown', startDrag);
+            cropCanvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    lastTouchDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                } else {
+                    startDrag(e);
+                }
+            });
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2) {
+                    const touchDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                    const delta = touchDistance - lastTouchDistance;
+                    const slider = document.getElementById('zoomSlider');
+                    const newZoom = Math.max(100, Math.min(300, parseInt(slider.value) + delta * 0.3));
+                    slider.value = newZoom;
+                    handleZoom({ target: { value: newZoom } });
+                    lastTouchDistance = touchDistance;
+                    e.preventDefault();
+                } else {
+                    drag(e);
+                }
+            });
+            
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+            
+            document.getElementById('zoomSlider').addEventListener('input', handleZoom);
+            document.getElementById('zoomIn').addEventListener('click', () => {
+                const slider = document.getElementById('zoomSlider');
+                slider.value = Math.min(300, parseInt(slider.value) + 10);
+                handleZoom({ target: slider });
+            });
+            document.getElementById('zoomOut').addEventListener('click', () => {
+                const slider = document.getElementById('zoomSlider');
+                slider.value = Math.max(100, parseInt(slider.value) - 10);
+                handleZoom({ target: slider });
+            });
+            
+            document.getElementById('saveCrop').onclick = saveCroppedImage;
+            document.getElementById('cancelCrop').onclick = () => {
+                document.getElementById('cropModal').classList.add('hidden');
+                photoInput.value = '';
+            };
+        }
+
+        function startDrag(e) {
+            isDragging = true;
+            const rect = cropCanvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            startX = clientX - rect.left - imageX;
+            startY = clientY - rect.top - imageY;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const rect = cropCanvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            imageX = clientX - rect.left - startX;
+            imageY = clientY - rect.top - startY;
+            drawCropper();
+        }
+
+        function stopDrag() {
+            isDragging = false;
+        }
+
+        function handleZoom(e) {
+            const zoomPercent = parseInt(e.target.value);
+            const baseScale = canvasSize / Math.max(cropperImage.width, cropperImage.height);
+            const oldScale = imageScale;
+            imageScale = baseScale * (zoomPercent / 100);
+            const centerX = canvasSize / 2;
+            const centerY = canvasSize / 2;
+            imageX = centerX - (centerX - imageX) * (imageScale / oldScale);
+            imageY = centerY - (centerY - imageY) * (imageScale / oldScale);
+            drawCropper();
+        }
+
+        function saveCroppedImage() {
+            const outputCanvas = document.createElement('canvas');
+            const outputSize = 400;
+            outputCanvas.width = outputSize;
+            outputCanvas.height = outputSize;
+            const outputCtx = outputCanvas.getContext('2d');
+            const centerX = canvasSize / 2;
+            const centerY = canvasSize / 2;
+            const radius = canvasSize / 2 - 20;
+            const scale = outputSize / (radius * 2);
+            
+            outputCtx.beginPath();
+            outputCtx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2);
+            outputCtx.clip();
+            outputCtx.drawImage(cropperImage, (imageX - (centerX - radius)) * scale, (imageY - (centerY - radius)) * scale, cropperImage.width * imageScale * scale, cropperImage.height * imageScale * scale);
+            
+            const croppedImage = outputCanvas.toDataURL('image/jpeg', 0.7);
+            profileData.photo = croppedImage;
+            profilePreview.src = croppedImage;
+            profilePreview.style.display = 'block';
+            cameraIcon.style.display = 'none';
+            document.getElementById('cropModal').classList.add('hidden');
+            checkFormComplete();
+        }
 
         // Name input
         document.getElementById('nameInput').addEventListener('input', (e) => {
