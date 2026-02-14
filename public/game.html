@@ -260,10 +260,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // VERSION CHECK - Look for this in console (F12)
-        const APP_VERSION = 'v2.8.2';
+        const APP_VERSION = 'v2.8.3';
         console.log('%c🎮 SECRET GAME LOADED', 'color: #6c3aed; font-size: 20px; font-weight: bold;');
         console.log('%cVersion: ' + APP_VERSION, 'color: #2d5cf6; font-size: 16px; font-weight: bold;');
-        console.log('%cLast Update: FIX - Clear inline styles when showing pages', 'color: #999; font-size: 12px;');
+        console.log('%cLast Update: FIX - Blank confirmation page + 0/0 voted issue', 'color: #999; font-size: 12px;');
         console.log('-----------------------------------');
         
         const socket = io();
@@ -300,6 +300,7 @@
         let currentPlayers = [];
         let isAnonymousVote = false;
         let isShowingResults = false; // Flag to prevent waiting page from showing during results
+        let lastVoteProgress = { voted: 0, total: 0 }; // Store last vote progress
 
         // Sound Effects using Web Audio API
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -619,6 +620,9 @@
         socket.on('vote-progress', (data) => {
             console.log('📊 Vote progress received:', data);
             
+            // Store vote progress for later use
+            lastVoteProgress = data;
+            
             // ONLY update if NOT showing results and waiting page is visible
             const waitingPage = document.getElementById('waitingPage');
             const resultsPage = document.getElementById('resultsPage');
@@ -773,12 +777,14 @@
                 confirmationText.textContent = 'Everyone will see who you voted for!';
             }
             
-            // Show confirmation
+            // Show confirmation (clear inline styles)
             document.getElementById('questionPage').classList.add('hidden');
-            document.getElementById('confirmationPage').classList.remove('hidden');
+            const confirmationPage = document.getElementById('confirmationPage');
+            confirmationPage.classList.remove('hidden');
+            confirmationPage.style.display = 'block';
             
             setTimeout(() => {
-                document.getElementById('confirmationPage').classList.add('hidden');
+                confirmationPage.classList.add('hidden');
                 
                 const waitingPage = document.getElementById('waitingPage');
                 waitingPage.classList.remove('hidden');
@@ -788,7 +794,9 @@
                 waitingPage.style.opacity = '';
                 
                 document.getElementById('waitingText').textContent = 'Waiting for everyone else...';
-                // The vote-progress event from server will update the counter
+                // Apply stored vote progress
+                document.getElementById('waitingProgress').textContent = 
+                    `${lastVoteProgress.voted}/${lastVoteProgress.total} voted`;
             }, 1000);
         }
 
