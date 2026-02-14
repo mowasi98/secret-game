@@ -132,7 +132,7 @@
     <script>
         // VERSION CHECK
         console.log('%c🎮 SECRET GAME - LOGIN PAGE', 'color: #6c3aed; font-size: 18px; font-weight: bold;');
-        console.log('%cVersion: v2.4.3', 'color: #2d5cf6; font-size: 14px;');
+        console.log('%cVersion: v2.4.4', 'color: #2d5cf6; font-size: 14px;');
         
         const socket = io();
 
@@ -213,30 +213,25 @@
             // Clear canvas
             cropCtx.clearRect(0, 0, canvasSize, canvasSize);
             
-            // Save context state
-            cropCtx.save();
-            
-            // Draw the image
+            // Draw the full image (freely movable)
             const imgWidth = cropperImage.width * imageScale;
             const imgHeight = cropperImage.height * imageScale;
             cropCtx.drawImage(cropperImage, imageX, imageY, imgWidth, imgHeight);
             
-            // Restore context
-            cropCtx.restore();
-            
-            // Draw dark overlay everywhere
-            cropCtx.globalCompositeOperation = 'destination-over';
+            // Draw dark overlay ONLY outside the circle using path clipping
+            cropCtx.save();
             cropCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            cropCtx.fillRect(0, 0, canvasSize, canvasSize);
             
-            // Cut out the circle to reveal the image underneath
-            cropCtx.globalCompositeOperation = 'destination-out';
+            // Create a path that covers everything EXCEPT the circle
             cropCtx.beginPath();
-            cropCtx.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - 20, 0, Math.PI * 2);
-            cropCtx.fill();
+            // Outer rectangle (entire canvas)
+            cropCtx.rect(0, 0, canvasSize, canvasSize);
+            // Inner circle (hole) - counter-clockwise to subtract
+            cropCtx.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - 20, 0, Math.PI * 2, true);
+            // Fill using even-odd rule (creates hole)
+            cropCtx.fill('evenodd');
             
-            // Reset composite operation
-            cropCtx.globalCompositeOperation = 'source-over';
+            cropCtx.restore();
         }
 
         function setupCropperControls() {
