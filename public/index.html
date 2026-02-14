@@ -132,7 +132,7 @@
     <script>
         // VERSION CHECK
         console.log('%c🎮 SECRET GAME - LOGIN PAGE', 'color: #6c3aed; font-size: 18px; font-weight: bold;');
-        console.log('%cVersion: v2.1.0', 'color: #2d5cf6; font-size: 14px;');
+        console.log('%cVersion: v2.4.1', 'color: #2d5cf6; font-size: 14px;');
         
         const socket = io();
 
@@ -160,6 +160,7 @@
         let imageX = 0;
         let imageY = 0;
         let imageScale = 1;
+        let initialScale = 1;
         let isDragging = false;
         let startX = 0;
         let startY = 0;
@@ -191,13 +192,15 @@
             cropCanvas.width = canvasSize;
             cropCanvas.height = canvasSize;
             
+            // Calculate initial scale to fit image in canvas
             const imgAspect = cropperImage.width / cropperImage.height;
             if (imgAspect > 1) {
-                imageScale = canvasSize / cropperImage.height;
+                initialScale = canvasSize / cropperImage.height;
             } else {
-                imageScale = canvasSize / cropperImage.width;
+                initialScale = canvasSize / cropperImage.width;
             }
             
+            imageScale = initialScale;
             imageX = (canvasSize - cropperImage.width * imageScale) / 2;
             imageY = (canvasSize - cropperImage.height * imageScale) / 2;
             
@@ -207,15 +210,32 @@
         }
 
         function drawCropper() {
+            // Clear canvas
             cropCtx.clearRect(0, 0, canvasSize, canvasSize);
-            cropCtx.drawImage(cropperImage, imageX, imageY, cropperImage.width * imageScale, cropperImage.height * imageScale);
+            
+            // Save context state
+            cropCtx.save();
+            
+            // Draw the image
+            const imgWidth = cropperImage.width * imageScale;
+            const imgHeight = cropperImage.height * imageScale;
+            cropCtx.drawImage(cropperImage, imageX, imageY, imgWidth, imgHeight);
+            
+            // Restore context
+            cropCtx.restore();
+            
+            // Draw dark overlay everywhere
             cropCtx.globalCompositeOperation = 'destination-over';
             cropCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             cropCtx.fillRect(0, 0, canvasSize, canvasSize);
+            
+            // Cut out the circle to reveal the image underneath
             cropCtx.globalCompositeOperation = 'destination-out';
             cropCtx.beginPath();
             cropCtx.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2 - 20, 0, Math.PI * 2);
             cropCtx.fill();
+            
+            // Reset composite operation
             cropCtx.globalCompositeOperation = 'source-over';
         }
 
@@ -295,37 +315,62 @@
 
         function handleZoom(e) {
             const zoomPercent = parseInt(e.target.value);
-            const baseScale = canvasSize / Math.max(cropperImage.width, cropperImage.height);
             const oldScale = imageScale;
-            imageScale = baseScale * (zoomPercent / 100);
+            imageScale = initialScale * (zoomPercent / 100);
+            
+            // Keep zoom centered on canvas center
             const centerX = canvasSize / 2;
             const centerY = canvasSize / 2;
-            imageX = centerX - (centerX - imageX) * (imageScale / oldScale);
-            imageY = centerY - (centerY - imageY) * (imageScale / oldScale);
+            const scaleDiff = imageScale / oldScale;
+            
+            imageX = centerX - (centerX - imageX) * scaleDiff;
+            imageY = centerY - (centerY - imageY) * scaleDiff;
+            
             drawCropper();
         }
 
         function saveCroppedImage() {
+            // Create output canvas for the cropped circular image
             const outputCanvas = document.createElement('canvas');
             const outputSize = 400;
             outputCanvas.width = outputSize;
             outputCanvas.height = outputSize;
             const outputCtx = outputCanvas.getContext('2d');
+            
+            // Calculate the crop area from the canvas
             const centerX = canvasSize / 2;
             const centerY = canvasSize / 2;
             const radius = canvasSize / 2 - 20;
+            
+            // Calculate scale factor from crop circle to output size
             const scale = outputSize / (radius * 2);
             
+            // Create circular clipping path
+            outputCtx.save();
             outputCtx.beginPath();
             outputCtx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2);
             outputCtx.clip();
-            outputCtx.drawImage(cropperImage, (imageX - (centerX - radius)) * scale, (imageY - (centerY - radius)) * scale, cropperImage.width * imageScale * scale, cropperImage.height * imageScale * scale);
             
+            // Calculate source position for the crop
+            const srcX = (imageX - (centerX - radius)) * scale;
+            const srcY = (imageY - (centerY - radius)) * scale;
+            const srcWidth = cropperImage.width * imageScale * scale;
+            const srcHeight = cropperImage.height * imageScale * scale;
+            
+            // Draw the cropped portion
+            outputCtx.drawImage(cropperImage, srcX, srcY, srcWidth, srcHeight);
+            outputCtx.restore();
+            
+            // Convert to base64
             const croppedImage = outputCanvas.toDataURL('image/jpeg', 0.7);
+            
+            // Update profile
             profileData.photo = croppedImage;
             profilePreview.src = croppedImage;
             profilePreview.style.display = 'block';
             cameraIcon.style.display = 'none';
+            
+            // Close modal
             document.getElementById('cropModal').classList.add('hidden');
             checkFormComplete();
         }
