@@ -786,17 +786,26 @@
             // Play success sound
             playSuccessSound();
 
-            // Show the correct badge based on vote type
+            // FORCE hide BOTH badges first (reset state)
+            const anonymousBadge = document.getElementById('anonymousBadgeResults');
+            const publicBadge = document.getElementById('publicBadgeResults');
+            
+            anonymousBadge.classList.add('hidden');
+            publicBadge.classList.add('hidden');
+            anonymousBadge.style.display = 'none';
+            publicBadge.style.display = 'none';
+            
+            // Now show ONLY the correct badge based on vote type
             if (data.isAnonymous === true) {
-                // Anonymous vote - show anonymous badge
-                document.getElementById('anonymousBadgeResults').classList.remove('hidden');
-                document.getElementById('publicBadgeResults').classList.add('hidden');
-                console.log('🔒 Anonymous badge shown');
+                // Anonymous vote - show ONLY anonymous badge
+                anonymousBadge.classList.remove('hidden');
+                anonymousBadge.style.display = 'inline-block';
+                console.log('🔒 Anonymous badge shown, public badge hidden');
             } else {
-                // Public vote - show public badge
-                document.getElementById('anonymousBadgeResults').classList.add('hidden');
-                document.getElementById('publicBadgeResults').classList.remove('hidden');
-                console.log('🔓 Public badge shown');
+                // Public vote - show ONLY public badge
+                publicBadge.classList.remove('hidden');
+                publicBadge.style.display = 'inline-block';
+                console.log('🔓 Public badge shown, anonymous badge hidden');
             }
 
             // Display results for both players
