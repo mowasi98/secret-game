@@ -255,10 +255,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // VERSION CHECK - Look for this in console (F12)
-        const APP_VERSION = 'v2.6.3';
+        const APP_VERSION = 'v2.7.0';
         console.log('%c🎮 SECRET GAME LOADED', 'color: #6c3aed; font-size: 20px; font-weight: bold;');
         console.log('%cVersion: ' + APP_VERSION, 'color: #2d5cf6; font-size: 16px; font-weight: bold;');
-        console.log('%cLast Update: Arrow centering + Phone lock fix', 'color: #999; font-size: 12px;');
+        console.log('%cLast Update: FLAG system to prevent waiting page during results', 'color: #999; font-size: 12px;');
         console.log('-----------------------------------');
         
         const socket = io();
@@ -294,6 +294,7 @@
         let selectedCrush = null;
         let currentPlayers = [];
         let isAnonymousVote = false;
+        let isShowingResults = false; // Flag to prevent waiting page from showing during results
 
         // Sound Effects using Web Audio API
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -442,6 +443,8 @@
 
         // Wheel ready
         socket.on('wheel-ready', () => {
+            isShowingResults = false; // Reset flag for wheel mode
+            
             // Hide waiting page explicitly
             const waitingPage = document.getElementById('waitingPage');
             waitingPage.classList.add('hidden');
@@ -564,6 +567,8 @@
 
         // Question mode: Game started
         socket.on('game-started', (data) => {
+            isShowingResults = false; // Reset flag for new game
+            
             // Hide waiting page completely
             const waitingPage = document.getElementById('waitingPage');
             waitingPage.classList.add('hidden');
@@ -576,6 +581,7 @@
 
         socket.on('next-question', (data) => {
             hasVoted = false;
+            isShowingResults = false; // Reset flag for new question
             
             // Hide all other pages with explicit display:none
             document.getElementById('resultsPage').classList.add('hidden');
@@ -595,11 +601,11 @@
         socket.on('vote-progress', (data) => {
             console.log('📊 Vote progress received:', data);
             
-            // ONLY update if waiting page is visible AND results page is NOT visible
+            // ONLY update if NOT showing results and waiting page is visible
             const waitingPage = document.getElementById('waitingPage');
             const resultsPage = document.getElementById('resultsPage');
             
-            if (!waitingPage.classList.contains('hidden') && resultsPage.classList.contains('hidden')) {
+            if (!isShowingResults && !waitingPage.classList.contains('hidden') && resultsPage.classList.contains('hidden')) {
                 document.getElementById('waitingProgress').textContent = 
                     `${data.voted}/${data.total} voted`;
                 
@@ -608,7 +614,7 @@
                 // Play a subtle tick sound for each vote
                 playTickSound();
             } else {
-                console.log('⚠️ Skipped progress update (results showing or waiting hidden)');
+                console.log('⚠️ Skipped progress update (showing results or waiting hidden)');
             }
         });
 
@@ -758,6 +764,9 @@
         socket.on('vote-results', (data) => {
             console.log('✅ RESULTS RECEIVED:', data);
             
+            // SET FLAG: Prevent any code from showing waiting page
+            isShowingResults = true;
+            
             // Step 1: Hide waiting page FIRST (before anything else)
             const waitingPage = document.getElementById('waitingPage');
             waitingPage.classList.add('hidden');
@@ -857,6 +866,8 @@
 
         // Show crush question (Spicy mode only)
         socket.on('show-crush-question', (data) => {
+            isShowingResults = false; // Reset flag for crush question
+            
             // Hide waiting page explicitly
             const waitingPage = document.getElementById('waitingPage');
             waitingPage.classList.add('hidden');
