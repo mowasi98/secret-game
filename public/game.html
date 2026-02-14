@@ -434,7 +434,10 @@
                     
                     const waitingPage = document.getElementById('waitingPage');
                     waitingPage.classList.remove('hidden');
-                    waitingPage.style.display = ''; // Clear inline style
+                    // Clear ALL inline styles to show it properly
+                    waitingPage.style.display = '';
+                    waitingPage.style.visibility = '';
+                    waitingPage.style.opacity = '';
                 }
             });
 
@@ -592,9 +595,11 @@
         socket.on('vote-progress', (data) => {
             console.log('📊 Vote progress received:', data);
             
-            // ONLY update if waiting page is actually visible (not during results)
+            // ONLY update if waiting page is visible AND results page is NOT visible
             const waitingPage = document.getElementById('waitingPage');
-            if (!waitingPage.classList.contains('hidden')) {
+            const resultsPage = document.getElementById('resultsPage');
+            
+            if (!waitingPage.classList.contains('hidden') && resultsPage.classList.contains('hidden')) {
                 document.getElementById('waitingProgress').textContent = 
                     `${data.voted}/${data.total} voted`;
                 
@@ -603,7 +608,7 @@
                 // Play a subtle tick sound for each vote
                 playTickSound();
             } else {
-                console.log('⚠️ Waiting page hidden, skipping progress update');
+                console.log('⚠️ Skipped progress update (results showing or waiting hidden)');
             }
         });
 
@@ -739,7 +744,10 @@
                 
                 const waitingPage = document.getElementById('waitingPage');
                 waitingPage.classList.remove('hidden');
-                waitingPage.style.display = ''; // Clear inline style
+                // Clear ALL inline styles to show it properly
+                waitingPage.style.display = '';
+                waitingPage.style.visibility = '';
+                waitingPage.style.opacity = '';
                 
                 document.getElementById('waitingText').textContent = 'Waiting for everyone else...';
                 // The vote-progress event from server will update the counter
@@ -753,14 +761,18 @@
             // Hide ALL other pages first
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             
-            // FORCE hide waiting page (with extra safeguard)
+            // FORCE hide waiting page (with extra safeguards)
             const waitingPage = document.getElementById('waitingPage');
             waitingPage.classList.add('hidden');
             waitingPage.style.display = 'none'; // Extra safeguard
+            waitingPage.style.visibility = 'hidden'; // Triple safeguard
+            waitingPage.style.opacity = '0'; // Quadruple safeguard
             
-            console.log('✅ Waiting page hidden, showing results...');
+            console.log('✅ Waiting page FULLY hidden with multiple safeguards');
             
-            document.getElementById('waitingText').textContent = 'Waiting for everyone else...'; // Reset for next time
+            // Reset waiting text for next question
+            document.getElementById('waitingText').textContent = 'Waiting for everyone else...';
+            document.getElementById('waitingProgress').textContent = '0/0 voted';
             
             // Show results
             const resultsPage = document.getElementById('resultsPage');
@@ -770,11 +782,13 @@
             // Play success sound
             playSuccessSound();
 
-            // Show anonymous badge if this vote was anonymous
-            if (isAnonymousVote) {
+            // Show anonymous badge ONLY if this vote was ACTUALLY anonymous (from server data)
+            if (data.isAnonymous === true) {
                 document.getElementById('anonymousBadgeResults').classList.remove('hidden');
+                console.log('🔒 Anonymous badge shown');
             } else {
                 document.getElementById('anonymousBadgeResults').classList.add('hidden');
+                console.log('🌐 Public vote - no anonymous badge');
             }
 
             // Display results for both players
@@ -884,7 +898,10 @@
                 
                 const waitingPage = document.getElementById('waitingPage');
                 waitingPage.classList.remove('hidden');
-                waitingPage.style.display = ''; // Clear inline style
+                // Clear ALL inline styles to show it properly
+                waitingPage.style.display = '';
+                waitingPage.style.visibility = '';
+                waitingPage.style.opacity = '';
                 
                 document.getElementById('waitingText').textContent = 'Waiting for everyone to vote...';
             };
