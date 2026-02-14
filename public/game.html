@@ -188,6 +188,10 @@
                 <div class="anonymous-badge hidden" id="anonymousBadgeResults">
                     🔒 This vote was anonymous
                 </div>
+                <div class="public-badge hidden" id="publicBadgeResults">
+                    <div style="font-size: 1.1rem; font-weight: 700;">🔓 This vote was public</div>
+                    <div style="font-size: 0.85rem; margin-top: 4px; opacity: 0.9;">No secrets - everyone can see the votes!</div>
+                </div>
             </div>
             <div class="poll-results">
                 <div class="player-vote-results">
@@ -782,13 +786,17 @@
             // Play success sound
             playSuccessSound();
 
-            // Show anonymous badge ONLY if this vote was ACTUALLY anonymous (from server data)
+            // Show the correct badge based on vote type
             if (data.isAnonymous === true) {
+                // Anonymous vote - show anonymous badge
                 document.getElementById('anonymousBadgeResults').classList.remove('hidden');
+                document.getElementById('publicBadgeResults').classList.add('hidden');
                 console.log('🔒 Anonymous badge shown');
             } else {
+                // Public vote - show public badge
                 document.getElementById('anonymousBadgeResults').classList.add('hidden');
-                console.log('🌐 Public vote - no anonymous badge');
+                document.getElementById('publicBadgeResults').classList.remove('hidden');
+                console.log('🔓 Public badge shown');
             }
 
             // Display results for both players

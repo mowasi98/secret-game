@@ -1726,6 +1726,41 @@ body::after {
     letter-spacing: 0.5px;
 }
 
+/* Public badge */
+.public-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 187, 0, 0.35));
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 14px 28px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 12px 0;
+    border: 2px solid rgba(255, 215, 0, 0.6);
+    box-shadow: 0 5px 25px rgba(255, 215, 0, 0.3);
+    letter-spacing: 0.5px;
+    animation: publicGlow 2s ease-in-out infinite;
+}
+
+@keyframes publicGlow {
+    0%, 100% {
+        box-shadow: 0 5px 25px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
+    }
+}
+
+@-webkit-keyframes publicGlow {
+    0%, 100% {
+        box-shadow: 0 5px 25px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
+    }
+}
+
 /* Vote confirmation */
 .vote-confirmation {
     background: rgba(255, 255, 255, 0.2);
