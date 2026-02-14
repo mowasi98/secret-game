@@ -830,6 +830,47 @@ function getRandomQuestions(mode) {
     }));
 }
 
+// Select two players with dynamic cooldown system
+function selectTwoPlayersWithCooldown(game) {
+    // Calculate cooldown based on player count
+    const cooldown = game.players.length <= 4 ? 1 : 2;
+    
+    // Initialize recent appearances array if not exists
+    if (!game.recentAppearances) {
+        game.recentAppearances = [];
+    }
+    
+    // Filter players who are NOT on cooldown
+    const availablePlayers = game.players.filter(player => {
+        // Count how many recent questions this player appeared in
+        const recentCount = game.recentAppearances.filter(id => id === player.id).length;
+        return recentCount === 0;
+    });
+    
+    let selectedPlayers;
+    
+    if (availablePlayers.length >= 2) {
+        // Pick 2 random players from available pool
+        const shuffled = [...availablePlayers].sort(() => Math.random() - 0.5);
+        selectedPlayers = [shuffled[0], shuffled[1]];
+    } else {
+        // Not enough available players, pick from all (oldest cooldown first)
+        const shuffled = [...game.players].sort(() => Math.random() - 0.5);
+        selectedPlayers = [shuffled[0], shuffled[1]];
+    }
+    
+    // Add selected players to recent appearances
+    game.recentAppearances.push(selectedPlayers[0].id, selectedPlayers[1].id);
+    
+    // Keep only last (cooldown * 2) entries to maintain cooldown window
+    const maxRecentSize = cooldown * 2;
+    if (game.recentAppearances.length > maxRecentSize) {
+        game.recentAppearances = game.recentAppearances.slice(-maxRecentSize);
+    }
+    
+    return selectedPlayers;
+}
+
 io.on('connection', (socket) => {
     console.log('Player connected:', socket.id);
 
@@ -867,6 +908,9 @@ io.on('connection', (socket) => {
             currentQuestionIndex: 0,
             questions: [],
             votes: {},
+            crushVotes: {},
+            crushQuestionShown: false,
+            recentAppearances: [],
             wheelSubmissions: {},
             wheelData: []
         };
@@ -1023,10 +1067,10 @@ io.on('connection', (socket) => {
             const firstQuestion = game.questions[0];
             const isAnonymous = !firstQuestion.isPublic;
             
-            // Get two random players for voting
-            const shuffled = [...game.players].sort(() => Math.random() - 0.5);
-            const player1 = shuffled[0];
-            const player2 = shuffled[1];
+            // Get two players with dynamic cooldown system
+            const selectedPlayers = selectTwoPlayersWithCooldown(game);
+            const player1 = selectedPlayers[0];
+            const player2 = selectedPlayers[1];
             
             // Store for admin panel
             game.currentVotingPlayers = [player1, player2];
@@ -1217,29 +1261,36 @@ io.on('connection', (socket) => {
 
         if (game.currentQuestionIndex >= game.questions.length) {
             // Last question finished - check if we should show crush question
-            if (game.mode === 'spicy') {
+            if (game.mode === 'spicy' && !game.crushQuestionShown) {
                 // Count boys and girls
                 const boys = game.players.filter(p => p.gender === 'boy');
                 const girls = game.players.filter(p => p.gender === 'girl');
 
                 if (boys.length > 0 && girls.length > 0) {
-                    // Mixed genders - show crush question
-                    console.log(`Showing crush question for game ${gameCode}`);
-                    game.status = 'crush-voting';
-                    game.crushVotes = {};
+                    // Mixed genders - 50% random chance to show crush question
+                    const shouldShow = Math.random() < 0.5;
+                    
+                    if (shouldShow) {
+                        console.log(`Showing crush question for game ${gameCode} (random chance)`);
+                        game.status = 'crush-voting';
+                        game.crushVotes = {};
+                        game.crushQuestionShown = true; // Mark as shown, never show again
 
-                    // Send crush question to each player with their opposite gender options
-                    game.players.forEach(player => {
-                        const oppositeGender = player.gender === 'boy' ? 'girl' : 'boy';
-                        const options = game.players.filter(p => p.gender === oppositeGender);
+                        // Send crush question to each player with their opposite gender options
+                        game.players.forEach(player => {
+                            const oppositeGender = player.gender === 'boy' ? 'girl' : 'boy';
+                            const options = game.players.filter(p => p.gender === oppositeGender);
 
-                        io.to(player.id).emit('show-crush-question', { options });
-                    });
-                    return;
+                            io.to(player.id).emit('show-crush-question', { options });
+                        });
+                        return;
+                    } else {
+                        console.log(`Skipping crush question for game ${gameCode} this time (random chance)`);
+                    }
                 }
             }
 
-            // No crush question - go straight to finished
+            // No crush question or already shown - go straight to finished
             game.status = 'finished';
             io.to(gameCode).emit('game-finished');
             broadcastToAdmins();
@@ -1250,10 +1301,10 @@ io.on('connection', (socket) => {
         const currentQuestion = game.questions[game.currentQuestionIndex];
         const isAnonymous = !currentQuestion.isPublic;
 
-        // Get two random players for voting
-        const shuffled = [...game.players].sort(() => Math.random() - 0.5);
-        const player1 = shuffled[0];
-        const player2 = shuffled[1];
+        // Get two players with dynamic cooldown system
+        const selectedPlayers = selectTwoPlayersWithCooldown(game);
+        const player1 = selectedPlayers[0];
+        const player2 = selectedPlayers[1];
 
         // Store for admin panel
         game.currentVotingPlayers = [player1, player2];
@@ -1307,13 +1358,14 @@ io.on('connection', (socket) => {
 
         console.log(`Game ${gameCode} restarting - returning to lobby`);
 
-        // Reset game state
+        // Reset game state (but keep crushQuestionShown to track across games)
         game.mode = null;
         game.status = 'lobby';
         game.currentQuestionIndex = 0;
         game.questions = [];
         game.votes = {};
         game.crushVotes = {};
+        game.recentAppearances = []; // Reset player appearance tracking
         game.wheelSubmissions = {};
         game.wheelData = [];
 
