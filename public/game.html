@@ -203,6 +203,11 @@
                 </div>
             </div>
 
+            <!-- Status text for results page -->
+            <div id="resultsStatusText" style="text-align: center; margin: 25px 0 15px 0; font-size: 1.1rem; color: rgba(255, 255, 255, 0.8); font-weight: 500;">
+                <!-- Will be filled by JavaScript -->
+            </div>
+
             <button class="glass-btn hidden" id="nextQuestionBtn">
                 Next Question ➜
             </button>
@@ -255,10 +260,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // VERSION CHECK - Look for this in console (F12)
-        const APP_VERSION = 'v2.7.1';
+        const APP_VERSION = 'v2.8.0';
         console.log('%c🎮 SECRET GAME LOADED', 'color: #6c3aed; font-size: 20px; font-weight: bold;');
         console.log('%cVersion: ' + APP_VERSION, 'color: #2d5cf6; font-size: 16px; font-weight: bold;');
-        console.log('%cLast Update: Dynamic confirmation emoji (🤐 anonymous, 👀 public)', 'color: #999; font-size: 12px;');
+        console.log('%cLast Update: Results page status text (different for admin vs players)', 'color: #999; font-size: 12px;');
         console.log('-----------------------------------');
         
         const socket = io();
@@ -574,6 +579,9 @@
             waitingPage.classList.add('hidden');
             waitingPage.style.display = 'none';
             
+            // Clear results status text
+            document.getElementById('resultsStatusText').textContent = '';
+            
             // Show question page
             document.getElementById('questionPage').classList.remove('hidden');
             displayQuestion(data);
@@ -591,6 +599,9 @@
             waitingPage.style.display = 'none';
             
             document.getElementById('confirmationPage').classList.add('hidden');
+            
+            // Clear results status text
+            document.getElementById('resultsStatusText').textContent = '';
             
             // Show question page
             document.getElementById('questionPage').classList.remove('hidden');
@@ -868,8 +879,15 @@
                 document.getElementById('voteDetails').classList.add('hidden');
             }
 
+            // Set status text based on admin or player
+            const resultsStatusText = document.getElementById('resultsStatusText');
             if (isAdmin) {
                 document.getElementById('nextQuestionBtn').classList.remove('hidden');
+                resultsStatusText.textContent = "Everyone's waiting for the next question";
+                resultsStatusText.style.color = 'rgba(255, 215, 0, 0.9)'; // Gold color for admin
+            } else {
+                resultsStatusText.textContent = "⏳ Waiting for admin to go to next question";
+                resultsStatusText.style.color = 'rgba(255, 255, 255, 0.8)'; // White for players
             }
         });
 
