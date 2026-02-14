@@ -454,6 +454,9 @@
                     <button class="toggle-section-btn" id="toggleWheelBtn" style="display: none;">
                         🎡 View Wheel Submissions
                     </button>
+                    <button class="toggle-section-btn" id="toggleCrushBtn" style="display: none;">
+                        💕 View Crush Votes
+                    </button>
                     <button class="toggle-section-btn" id="toggleHistoryBtn" style="display: none;">
                         📜 View Question History
                     </button>
@@ -472,6 +475,15 @@
                 <div class="detail-section hidden" id="wheelSubmissionsSection">
                     <h2>🎡 Wheel Submissions</h2>
                     <div id="wheelSubmissionsContent" class="wheel-submissions"></div>
+                </div>
+
+                <!-- Crush Votes (Hidden by default, shown with button) -->
+                <div class="detail-section hidden" id="crushVotesSection">
+                    <h2>💕 Crush Votes - Who's Your Type?</h2>
+                    <div style="background: rgba(255, 193, 7, 0.2); padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 0.9rem;">
+                        ⚠️ Admin View: These votes are anonymous to players but visible to you
+                    </div>
+                    <div id="crushVotesContent" class="crush-votes"></div>
                 </div>
 
                 <!-- Question History (Hidden by default, shown with button) -->
@@ -614,10 +626,12 @@
             // Reset all buttons
             document.getElementById('toggleVotesBtn').classList.remove('active');
             document.getElementById('toggleWheelBtn').classList.remove('active');
+            document.getElementById('toggleCrushBtn').classList.remove('active');
             document.getElementById('toggleHistoryBtn').classList.remove('active');
             document.getElementById('togglePlayersBtn').classList.remove('active');
             document.getElementById('toggleVotesBtn').textContent = '📊 View Live Votes';
             document.getElementById('toggleWheelBtn').textContent = '🎡 View Wheel Submissions';
+            document.getElementById('toggleCrushBtn').textContent = '💕 View Crush Votes';
             document.getElementById('toggleHistoryBtn').textContent = '📜 View Question History';
             document.getElementById('togglePlayersBtn').textContent = '👥 View All Players';
             
@@ -693,14 +707,23 @@
                 displayLiveVotes(game);
                 document.getElementById('toggleVotesBtn').style.display = 'inline-block';
                 document.getElementById('toggleWheelBtn').style.display = 'none';
+                document.getElementById('toggleCrushBtn').style.display = 'none';
             } else if (game.status === 'wheel-input' || game.status === 'wheel-ready') {
                 // Prepare wheel submissions data
                 displayWheelSubmissions(game);
                 document.getElementById('toggleWheelBtn').style.display = 'inline-block';
                 document.getElementById('toggleVotesBtn').style.display = 'none';
+                document.getElementById('toggleCrushBtn').style.display = 'none';
+            } else if (game.status === 'crush-voting' || (game.status === 'finished' && game.crushVotes && Object.keys(game.crushVotes).length > 0)) {
+                // Prepare crush votes data
+                displayCrushVotes(game);
+                document.getElementById('toggleCrushBtn').style.display = 'inline-block';
+                document.getElementById('toggleVotesBtn').style.display = 'none';
+                document.getElementById('toggleWheelBtn').style.display = 'none';
             } else {
                 document.getElementById('toggleVotesBtn').style.display = 'none';
                 document.getElementById('toggleWheelBtn').style.display = 'none';
+                document.getElementById('toggleCrushBtn').style.display = 'none';
             }
 
             document.getElementById('currentStatusContent').innerHTML = statusHTML;
@@ -826,6 +849,83 @@
             document.getElementById('wheelSubmissionsContent').innerHTML = submissionsHTML.join('');
         }
 
+        // Display crush votes (Admin sees all votes)
+        function displayCrushVotes(game) {
+            const crushVotes = game.crushVotes || {};
+            const crushHTML = [];
+
+            // ADMIN: Show header
+            crushHTML.push(`
+                <div style="background: rgba(255, 20, 147, 0.2); padding: 10px 15px; border-radius: 10px; margin-bottom: 15px; font-weight: 600;">
+                    💕 Who's Your Type? - Crush Question <span style="color: #ffd700; font-size: 0.85rem;">(Admin View: All votes visible)</span>
+                </div>
+            `);
+
+            // Create a vote tally
+            const voteTally = {};
+            Object.values(crushVotes).forEach(crushId => {
+                voteTally[crushId] = (voteTally[crushId] || 0) + 1;
+            });
+
+            // Display each player's vote
+            game.players.forEach(player => {
+                const votedForId = crushVotes[player.id];
+                const votedForPlayer = game.players.find(p => p.id === votedForId);
+                
+                if (votedForPlayer) {
+                    crushHTML.push(`
+                        <div class="player-vote-row" style="border-left: 3px solid rgba(255, 20, 147, 0.5);">
+                            <img src="${player.photo}" alt="${player.name}">
+                            <div style="flex: 1;">
+                                <strong>${player.name}</strong> (${player.gender === 'boy' ? '👦' : '👧'})
+                                <span class="voted"> → 💕 Voted for <strong>${votedForPlayer.name}</strong> (${votedForPlayer.gender === 'boy' ? '👦' : '👧'})</span>
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    crushHTML.push(`
+                        <div class="player-vote-row">
+                            <img src="${player.photo}" alt="${player.name}">
+                            <div style="flex: 1;">
+                                <strong>${player.name}</strong> (${player.gender === 'boy' ? '👦' : '👧'})
+                                <span class="not-voted">⏳ Haven't voted yet</span>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+
+            // Show vote tally summary
+            if (Object.keys(voteTally).length > 0) {
+                crushHTML.push(`
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(255, 20, 147, 0.15); border-radius: 10px;">
+                        <strong>📊 Vote Tally:</strong><br>
+                        <div style="margin-top: 10px;">
+                `);
+
+                Object.entries(voteTally)
+                    .sort((a, b) => b[1] - a[1])
+                    .forEach(([crushId, count]) => {
+                        const player = game.players.find(p => p.id === crushId);
+                        if (player) {
+                            crushHTML.push(`
+                                <div style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                                    <img src="${player.photo}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">
+                                    <strong>${player.name}</strong>: ${count} vote${count !== 1 ? 's' : ''}
+                                </div>
+                            `);
+                        }
+                    });
+
+                crushHTML.push(`
+                        </div>
+                    </div>
+                `);
+            }
+
+            document.getElementById('crushVotesContent').innerHTML = crushHTML.join('');
+        }
+
         // Display players list
         function displayPlayersList(players, adminId) {
             const playersHTML = players.map(player => `
@@ -915,6 +1015,14 @@
             section.classList.toggle('hidden');
             btn.classList.toggle('active');
             btn.textContent = section.classList.contains('hidden') ? '🎡 View Wheel Submissions' : '🎡 Hide Wheel Submissions';
+        });
+
+        document.getElementById('toggleCrushBtn').addEventListener('click', () => {
+            const section = document.getElementById('crushVotesSection');
+            const btn = document.getElementById('toggleCrushBtn');
+            section.classList.toggle('hidden');
+            btn.classList.toggle('active');
+            btn.textContent = section.classList.contains('hidden') ? '💕 View Crush Votes' : '💕 Hide Crush Votes';
         });
 
         document.getElementById('toggleHistoryBtn').addEventListener('click', () => {
