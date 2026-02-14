@@ -1183,29 +1183,28 @@ body::after {
 .wheel-pointer {
     position: absolute;
     top: -40px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    margin: 0 auto;
     font-size: 4rem;
     color: #6c3aed;
     filter: drop-shadow(0 0 20px rgba(108, 58, 237, 0.8))
             drop-shadow(0 5px 15px rgba(0, 0, 0, 0.7));
     animation: bounce 1s ease-in-out infinite;
     font-weight: 900;
-    z-index: 5;
+    z-index: 100;
     pointer-events: none;
     display: block;
-    width: 0;
-    height: 0;
+    width: fit-content;
+    height: auto;
     text-align: center;
-    z-index: 100;
     line-height: 1;
-    margin: 0;
     padding: 0;
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-10px); }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
 /* Question display */
@@ -2072,8 +2071,9 @@ body::after {
     .wheel-pointer {
         font-size: 3.8rem;
         top: -38px;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
+        margin: 0 auto;
     }
 }
 
@@ -2202,8 +2202,9 @@ body::after {
     .wheel-pointer {
         top: -35px;
         font-size: 3.5rem;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
+        margin: 0 auto;
     }
 
     /* Player voting cards mobile - side by side */
@@ -2385,8 +2386,9 @@ body::after {
     .wheel-pointer {
         font-size: 3.2rem;
         top: -32px;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
+        margin: 0 auto;
     }
 
     .players-circle {
