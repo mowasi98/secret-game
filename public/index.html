@@ -132,7 +132,7 @@
     <script>
         // VERSION CHECK
         console.log('%c🎮 SECRET GAME - LOGIN PAGE', 'color: #6c3aed; font-size: 18px; font-weight: bold;');
-        console.log('%cVersion: v2.4.1', 'color: #2d5cf6; font-size: 14px;');
+        console.log('%cVersion: v2.4.2', 'color: #2d5cf6; font-size: 14px;');
         
         const socket = io();
 
@@ -304,8 +304,27 @@
             const rect = cropCanvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            imageX = clientX - rect.left - startX;
-            imageY = clientY - rect.top - startY;
+            
+            // Calculate new position
+            let newX = clientX - rect.left - startX;
+            let newY = clientY - rect.top - startY;
+            
+            // Apply boundary constraints (keep image covering the circle)
+            const imgWidth = cropperImage.width * imageScale;
+            const imgHeight = cropperImage.height * imageScale;
+            const radius = canvasSize / 2 - 20;
+            const centerX = canvasSize / 2;
+            const centerY = canvasSize / 2;
+            
+            // Allow some movement but keep image overlapping circle
+            const maxX = centerX + radius;
+            const minX = centerX - radius - imgWidth;
+            const maxY = centerY + radius;
+            const minY = centerY - radius - imgHeight;
+            
+            imageX = Math.max(minX, Math.min(maxX, newX));
+            imageY = Math.max(minY, Math.min(maxY, newY));
+            
             drawCropper();
         }
 
@@ -325,6 +344,19 @@
             
             imageX = centerX - (centerX - imageX) * scaleDiff;
             imageY = centerY - (centerY - imageY) * scaleDiff;
+            
+            // Apply boundary constraints after zoom
+            const imgWidth = cropperImage.width * imageScale;
+            const imgHeight = cropperImage.height * imageScale;
+            const radius = canvasSize / 2 - 20;
+            
+            const maxX = centerX + radius;
+            const minX = centerX - radius - imgWidth;
+            const maxY = centerY + radius;
+            const minY = centerY - radius - imgHeight;
+            
+            imageX = Math.max(minX, Math.min(maxX, imageX));
+            imageY = Math.max(minY, Math.min(maxY, imageY));
             
             drawCropper();
         }
