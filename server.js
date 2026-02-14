@@ -832,41 +832,59 @@ function getRandomQuestions(mode) {
 
 // Select two players with dynamic cooldown system
 function selectTwoPlayersWithCooldown(game) {
-    // Calculate cooldown based on player count
-    const cooldown = game.players.length <= 4 ? 1 : 2;
-    
     // Initialize recent appearances array if not exists
     if (!game.recentAppearances) {
         game.recentAppearances = [];
     }
     
-    // Filter players who are NOT on cooldown
-    const availablePlayers = game.players.filter(player => {
-        // Count how many recent questions this player appeared in
-        const recentCount = game.recentAppearances.filter(id => id === player.id).length;
-        return recentCount === 0;
-    });
+    // Calculate cooldown: how many recent questions to track
+    // 3-4 players: track last 3 questions (6 IDs) = variety before repeat
+    // 5+ players: track last 4 questions (8 IDs) = even more variety
+    const questionsToTrack = game.players.length <= 4 ? 3 : 4;
+    const maxRecentSize = questionsToTrack * 2;
+    
+    // Filter players who haven't appeared recently (or appeared least)
+    const playerAppearanceCounts = game.players.map(player => ({
+        player,
+        count: game.recentAppearances.filter(id => id === player.id).length
+    }));
+    
+    // Sort by appearance count (least appearances first)
+    playerAppearanceCounts.sort((a, b) => a.count - b.count);
+    
+    // Get players with the LOWEST appearance count
+    const minCount = playerAppearanceCounts[0].count;
+    const availablePlayers = playerAppearanceCounts
+        .filter(p => p.count === minCount)
+        .map(p => p.player);
     
     let selectedPlayers;
     
     if (availablePlayers.length >= 2) {
-        // Pick 2 random players from available pool
-        const shuffled = [...availablePlayers].sort(() => Math.random() - 0.5);
+        // Fisher-Yates shuffle for true randomization
+        const shuffled = [...availablePlayers];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
         selectedPlayers = [shuffled[0], shuffled[1]];
     } else {
-        // Not enough available players, pick from all (oldest cooldown first)
-        const shuffled = [...game.players].sort(() => Math.random() - 0.5);
-        selectedPlayers = [shuffled[0], shuffled[1]];
+        // Only 1 available, pick them + another random
+        selectedPlayers = [availablePlayers[0]];
+        const others = game.players.filter(p => p.id !== availablePlayers[0].id);
+        const randomOther = others[Math.floor(Math.random() * others.length)];
+        selectedPlayers.push(randomOther);
     }
     
     // Add selected players to recent appearances
     game.recentAppearances.push(selectedPlayers[0].id, selectedPlayers[1].id);
     
-    // Keep only last (cooldown * 2) entries to maintain cooldown window
-    const maxRecentSize = cooldown * 2;
+    // Keep only last N questions worth of appearances for proper rotation
     if (game.recentAppearances.length > maxRecentSize) {
         game.recentAppearances = game.recentAppearances.slice(-maxRecentSize);
     }
+    
+    console.log(`🎲 Player Selection: Selected [${selectedPlayers[0].name}, ${selectedPlayers[1].name}] | Recent history: [${game.recentAppearances.slice(-6).join(', ')}]`);
     
     return selectedPlayers;
 }
