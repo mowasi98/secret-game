@@ -261,7 +261,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // VERSION CHECK - Look for this in console (F12)
-        const APP_VERSION = 'v2.6.0';
+        const APP_VERSION = 'v2.6.1';
         console.log('%c🎮 SECRET GAME LOADED', 'color: #6c3aed; font-size: 20px; font-weight: bold;');
         console.log('%cVersion: ' + APP_VERSION, 'color: #2d5cf6; font-size: 16px; font-weight: bold;');
         console.log('%cLast Update: Arrow centering + Phone lock fix', 'color: #999; font-size: 12px;');
@@ -566,18 +566,36 @@
 
         // Question mode: Game started
         socket.on('game-started', (data) => {
+            // FORCE hide waiting page
+            document.getElementById('waitingPage').classList.add('hidden');
+            document.getElementById('waitingPage').style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important;';
+            
+            // Show question page
+            const questionPage = document.getElementById('questionPage');
+            questionPage.classList.remove('hidden');
+            questionPage.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important;';
+            
             displayQuestion(data);
-            document.getElementById('questionPage').classList.remove('hidden');
         });
 
         socket.on('next-question', (data) => {
             hasVoted = false;
-            // Hide all other pages
+            
+            // FORCE hide all other pages with !important
             document.getElementById('resultsPage').classList.add('hidden');
+            document.getElementById('resultsPage').style.cssText = 'display: none !important;';
+            
             document.getElementById('waitingPage').classList.add('hidden');
+            document.getElementById('waitingPage').style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important;';
+            
             document.getElementById('confirmationPage').classList.add('hidden');
+            document.getElementById('confirmationPage').style.cssText = 'display: none !important;';
+            
             // Show question page
-            document.getElementById('questionPage').classList.remove('hidden');
+            const questionPage = document.getElementById('questionPage');
+            questionPage.classList.remove('hidden');
+            questionPage.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important;';
+            
             displayQuestion(data);
         });
 
@@ -748,51 +766,59 @@
         socket.on('vote-results', (data) => {
             console.log('✅ RESULTS RECEIVED:', data);
             
-            // Hide ALL other pages first
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            
-            // FORCE hide waiting page (with extra safeguards)
+            // NUCLEAR OPTION: Completely remove waiting page from view
             const waitingPage = document.getElementById('waitingPage');
             waitingPage.classList.add('hidden');
-            waitingPage.style.display = 'none'; // Extra safeguard
-            waitingPage.style.visibility = 'hidden'; // Triple safeguard
-            waitingPage.style.opacity = '0'; // Quadruple safeguard
+            waitingPage.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; position: absolute !important; z-index: -9999 !important;';
             
-            console.log('✅ Waiting page FULLY hidden with multiple safeguards');
+            // Hide ALL other pages
+            document.querySelectorAll('.page').forEach(p => {
+                if (p.id !== 'resultsPage') {
+                    p.classList.add('hidden');
+                    p.style.cssText = 'display: none !important;';
+                }
+            });
             
             // Reset waiting text for next question
             document.getElementById('waitingText').textContent = 'Waiting for everyone else...';
             document.getElementById('waitingProgress').textContent = '0/0 voted';
             
-            // Show results
+            console.log('✅ Waiting page COMPLETELY REMOVED from view');
+            
+            // Get badge elements
+            const anonymousBadge = document.getElementById('anonymousBadgeResults');
+            const publicBadge = document.getElementById('publicBadgeResults');
+            
+            // COMPLETELY RESET both badges first (force hide with !important)
+            anonymousBadge.classList.add('hidden');
+            publicBadge.classList.add('hidden');
+            anonymousBadge.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important;';
+            publicBadge.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important;';
+            
+            // Small delay to ensure reset takes effect
+            setTimeout(() => {
+                // Now show ONLY the correct badge
+                if (data.isAnonymous === true) {
+                    // Anonymous vote - show ONLY anonymous badge
+                    anonymousBadge.classList.remove('hidden');
+                    anonymousBadge.style.cssText = 'display: inline-block !important; visibility: visible !important; opacity: 1 !important;';
+                    console.log('🔒 Anonymous badge shown, public badge FORCE hidden');
+                } else {
+                    // Public vote - show ONLY public badge  
+                    publicBadge.classList.remove('hidden');
+                    publicBadge.style.cssText = 'display: inline-block !important; visibility: visible !important; opacity: 1 !important;';
+                    console.log('🔓 Public badge shown, anonymous badge FORCE hidden');
+                }
+            }, 50);
+            
+            // Show results page AFTER hiding everything else
             const resultsPage = document.getElementById('resultsPage');
             resultsPage.classList.remove('hidden');
+            resultsPage.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important;';
             console.log('✅ Results page should be visible now');
 
             // Play success sound
             playSuccessSound();
-
-            // FORCE hide BOTH badges first (reset state)
-            const anonymousBadge = document.getElementById('anonymousBadgeResults');
-            const publicBadge = document.getElementById('publicBadgeResults');
-            
-            anonymousBadge.classList.add('hidden');
-            publicBadge.classList.add('hidden');
-            anonymousBadge.style.display = 'none';
-            publicBadge.style.display = 'none';
-            
-            // Now show ONLY the correct badge based on vote type
-            if (data.isAnonymous === true) {
-                // Anonymous vote - show ONLY anonymous badge
-                anonymousBadge.classList.remove('hidden');
-                anonymousBadge.style.display = 'inline-block';
-                console.log('🔒 Anonymous badge shown, public badge hidden');
-            } else {
-                // Public vote - show ONLY public badge
-                publicBadge.classList.remove('hidden');
-                publicBadge.style.display = 'inline-block';
-                console.log('🔓 Public badge shown, anonymous badge hidden');
-            }
 
             // Display results for both players
             const player1 = currentPlayers[0];
