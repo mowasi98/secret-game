@@ -1099,6 +1099,9 @@ io.on('connection', (socket) => {
             // Question modes - get random 20 questions (excluding previously used ones)
             game.questions = getRandomQuestions(mode, game.usedQuestions || []);
             
+            // Initialize usedQuestions array if it doesn't exist (for backwards compatibility)
+            if (!game.usedQuestions) game.usedQuestions = [];
+            
             // Track newly used questions for this party
             game.questions.forEach(q => {
                 if (!game.usedQuestions.includes(q.text)) {
