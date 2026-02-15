@@ -812,17 +812,28 @@ function shuffleArray(array) {
 
 // Get random 20 questions from a mode (80% anonymous, 20% public)
 // Picks questions ONE BY ONE for maximum randomness and variety
-function getRandomQuestions(mode) {
+// Excludes previously used questions for same party to avoid repeats
+function getRandomQuestions(mode, excludeQuestions = []) {
     const questions = questionBanks[mode] || [];
-    const availableQuestions = [...questions]; // Copy to avoid modifying original
+    
+    // Filter out questions that were already used in previous games (same party)
+    const availableQuestions = questions.filter(q => !excludeQuestions.includes(q));
+    
+    // If we've used most questions, reset and use all questions again
+    if (availableQuestions.length < 20) {
+        console.log(`⚠️ Only ${availableQuestions.length} unused questions left, resetting pool`);
+        availableQuestions.push(...questions);
+    }
+    
+    const questionPool = [...availableQuestions]; // Copy to avoid modifying original
     const selected = [];
     
     // Pick 20 questions one by one randomly
-    const numQuestions = Math.min(20, availableQuestions.length);
+    const numQuestions = Math.min(20, questionPool.length);
     for (let i = 0; i < numQuestions; i++) {
-        const randomIndex = Math.floor(Math.random() * availableQuestions.length);
-        selected.push(availableQuestions[randomIndex]);
-        availableQuestions.splice(randomIndex, 1); // Remove picked question from pool
+        const randomIndex = Math.floor(Math.random() * questionPool.length);
+        selected.push(questionPool[randomIndex]);
+        questionPool.splice(randomIndex, 1); // Remove picked question from pool
     }
     
     // Mark questions as public or anonymous
@@ -938,7 +949,8 @@ io.on('connection', (socket) => {
             crushQuestionShown: false,
             recentAppearances: [],
             wheelSubmissions: {},
-            wheelData: []
+            wheelData: [],
+            usedQuestions: [] // Track questions used across multiple games for this party
         };
 
         games.set(gameCode, game);
@@ -1084,8 +1096,18 @@ io.on('connection', (socket) => {
             game.status = 'wheel-input';
             io.to(gameCode).emit('wheel-input-start', { prompts: wheelPrompts });
         } else {
-            // Question modes - get random 20 questions
-            game.questions = getRandomQuestions(mode);
+            // Question modes - get random 20 questions (excluding previously used ones)
+            game.questions = getRandomQuestions(mode, game.usedQuestions || []);
+            
+            // Track newly used questions for this party
+            game.questions.forEach(q => {
+                if (!game.usedQuestions.includes(q.text)) {
+                    game.usedQuestions.push(q.text);
+                }
+            });
+            
+            console.log(`📝 Game ${gameCode}: Using ${game.questions.length} new questions. Total used: ${game.usedQuestions.length}`);
+            
             game.status = 'playing';
             game.currentQuestionIndex = 0;
             
@@ -1386,7 +1408,7 @@ io.on('connection', (socket) => {
 
         console.log(`Game ${gameCode} restarting - returning to lobby`);
 
-        // Reset game state (but keep crushQuestionShown to track across games)
+        // Reset game state (but keep crushQuestionShown and usedQuestions to track across games)
         game.mode = null;
         game.status = 'lobby';
         game.currentQuestionIndex = 0;
@@ -1396,6 +1418,7 @@ io.on('connection', (socket) => {
         game.recentAppearances = []; // Reset player appearance tracking
         game.wheelSubmissions = {};
         game.wheelData = [];
+        // NOTE: usedQuestions is NOT reset - keeps tracking across multiple games for same party
 
         // Send everyone back to lobby
         io.to(gameCode).emit('return-to-lobby');
