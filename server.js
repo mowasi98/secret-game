@@ -791,10 +791,8 @@ const questionBanks = {
 
 // Wheel mode prompts
 const wheelPrompts = [
-    { type: 'dare', prompt: 'Write a dare for someone' },
     { type: 'personal', prompt: 'Ask a personal question about someone' },
-    { type: 'gossip', prompt: 'Share some recent gossip' },
-    { type: 'secret', prompt: 'What\'s the deepest secret you know about someone?' }
+    { type: 'gossip', prompt: 'Share some recent gossip' }
 ];
 
 // Generate random 6-digit game code
@@ -1165,10 +1163,10 @@ io.on('connection', (socket) => {
         game.wheelData.splice(randomIndex, 1);
 
         // Calculate exact rotation to land on the selected segment
-        // Pointer is at top (0°). Wheel segments: dare (0-180°), gossip (180-360°)
+        // Pointer is at top (0°). Wheel segments: personal (0-180°), gossip (180-360°)
         // To land under pointer, rotate wheel so segment center is at 0°
         const segmentAngles = {
-            dare: 270,     // Rotate 270° to bring dare (90° center) to top
+            personal: 270,     // Rotate 270° to bring personal (90° center) to top
             gossip: 90     // Rotate 90° to bring gossip (270° center) to top
         };
         

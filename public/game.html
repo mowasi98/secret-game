@@ -29,11 +29,11 @@
                 Fill out this prompt anonymously
             </div>
 
-            <div class="prompt-label" id="wheelPromptLabel">1. 💪 Dare</div>
+            <div class="prompt-label" id="wheelPromptLabel">1. 🔍 Personal Question</div>
             <textarea 
                 class="glass-textarea" 
                 id="wheelCurrentInput" 
-                placeholder="Write a dare for someone..."
+                placeholder="Ask a personal question about someone..."
                 maxlength="200"
             ></textarea>
 
@@ -96,10 +96,10 @@
                             </filter>
                         </defs>
                         <g transform="translate(200, 200)">
-                            <!-- DARE (Top Half: 0-180°) -->
-                            <path d="M 0,-170 A 170,170 0 0,1 170,0 A 170,170 0 0,1 0,170 L 0,0 Z" fill="url(#dareGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <!-- PERSONAL (Top Half: 0-180°) -->
+                            <path d="M 0,-170 A 170,170 0 0,1 170,0 A 170,170 0 0,1 0,170 L 0,0 Z" fill="url(#personalGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
                             <g transform="rotate(90)">
-                                <text x="0" y="-85" fill="white" font-size="24" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💪 DARE</text>
+                                <text x="0" y="-85" fill="white" font-size="20" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">🔍 PERSONAL</text>
                             </g>
                             
                             <!-- GOSSIP (Bottom Half: 180-360°) -->
@@ -110,7 +110,7 @@
                             
                             <!-- Center circle -->
                             <circle cx="0" cy="0" r="50" fill="#1a1a2e" stroke="#6c3aed" stroke-width="3"/>
-                            <circle cx="0" cy="0" r="45" fill="url(#dareGrad)"/>
+                            <circle cx="0" cy="0" r="45" fill="url(#personalGrad)"/>
                             <text x="0" y="8" fill="white" font-size="18" font-weight="900" text-anchor="middle" font-family="Poppins">SPIN</text>
                         </g>
                     </svg>
@@ -260,7 +260,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // VERSION CHECK - Look for this in console (F12)
-        const APP_VERSION = 'v2.8.3';
+        const APP_VERSION = 'v2.9.1';
         console.log('%c🎮 SECRET GAME LOADED', 'color: #6c3aed; font-size: 20px; font-weight: bold;');
         console.log('%cVersion: ' + APP_VERSION, 'color: #2d5cf6; font-size: 16px; font-weight: bold;');
         console.log('%cLast Update: FIX - Blank confirmation page + 0/0 voted issue', 'color: #999; font-size: 12px;');
@@ -381,7 +381,7 @@
             let wheelStep = 0;
             const wheelSubmissions = [];
             const wheelPrompts = [
-                { emoji: '💪', title: 'Dare', placeholder: 'Write a dare for someone...', type: 'dare' },
+                { emoji: '🔍', title: 'Personal Question', placeholder: 'Ask a personal question about someone...', type: 'personal' },
                 { emoji: '💬', title: 'Gossip', placeholder: 'Share some recent gossip...', type: 'gossip' }
             ];
 
@@ -516,12 +516,12 @@
             // Show result after drum roll (at 6 seconds total)
             setTimeout(() => {
                 const typeEmojis = {
-                    dare: '💪',
+                    personal: '🔍',
                     gossip: '💬'
                 };
 
                 const typeNames = {
-                    dare: 'Dare',
+                    personal: 'Personal Question',
                     gossip: 'Gossip'
                 };
 
