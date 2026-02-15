@@ -811,18 +811,28 @@ function shuffleArray(array) {
 }
 
 // Get random 20 questions from a mode (80% anonymous, 20% public)
+// Picks questions ONE BY ONE for maximum randomness and variety
 function getRandomQuestions(mode) {
     const questions = questionBanks[mode] || [];
-    const shuffled = shuffleArray(questions).slice(0, Math.min(20, questions.length));
+    const availableQuestions = [...questions]; // Copy to avoid modifying original
+    const selected = [];
+    
+    // Pick 20 questions one by one randomly
+    const numQuestions = Math.min(20, availableQuestions.length);
+    for (let i = 0; i < numQuestions; i++) {
+        const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+        selected.push(availableQuestions[randomIndex]);
+        availableQuestions.splice(randomIndex, 1); // Remove picked question from pool
+    }
     
     // Mark questions as public or anonymous
     // 80% anonymous (16 questions), 20% public (4 questions)
     const publicIndices = new Set();
-    while (publicIndices.size < 4 && publicIndices.size < shuffled.length) {
-        publicIndices.add(Math.floor(Math.random() * shuffled.length));
+    while (publicIndices.size < 4 && publicIndices.size < selected.length) {
+        publicIndices.add(Math.floor(Math.random() * selected.length));
     }
     
-    return shuffled.map((question, index) => ({
+    return selected.map((question, index) => ({
         text: question,
         isPublic: publicIndices.has(index)
     }));
