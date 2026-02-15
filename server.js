@@ -1285,8 +1285,8 @@ io.on('connection', (socket) => {
                 const girls = game.players.filter(p => p.gender === 'girl');
 
                 if (boys.length > 0 && girls.length > 0) {
-                    // Mixed genders - 50% random chance to show crush question
-                    const shouldShow = Math.random() < 0.5;
+                    // Mixed genders - 30% random chance to show crush question
+                    const shouldShow = Math.random() < 0.3;
                     
                     if (shouldShow) {
                         console.log(`Showing crush question for game ${gameCode} (random chance)`);

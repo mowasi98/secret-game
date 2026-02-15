@@ -780,7 +780,7 @@
                         <div style="flex: 1;">
                             <strong>${player.name}</strong>
                             ${hasVoted ? 
-                                `<span class="voted"> → ✅ Voted for <strong>${votedFor?.name || `[ID: ${voteTargetId}]`}</strong></span>` : 
+                                `<span class="voted"> → ✅ Voted for <strong>${votedFor?.name || 'Player Left'}</strong></span>` : 
                                 `<span class="not-voted"> → ⏳ Not voted yet</span>`
                             }
                         </div>
