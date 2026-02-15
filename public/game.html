@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -557,7 +557,9 @@
                 } else if (data.remaining === 0) {
                     setTimeout(() => {
                         document.getElementById('wheelSpinPage').classList.add('hidden');
-                        document.getElementById('finishedPage').classList.remove('hidden');
+                        const finishedPage = document.getElementById('finishedPage');
+                        finishedPage.classList.remove('hidden');
+                        finishedPage.style.display = 'block'; // Override inline display:none
                     }, 5000);
                 }
             }, 6000);
@@ -1017,7 +1019,9 @@
             waitingPage.style.display = 'none';
             
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            document.getElementById('finishedPage').classList.remove('hidden');
+            const finishedPage = document.getElementById('finishedPage');
+            finishedPage.classList.remove('hidden');
+            finishedPage.style.display = 'block'; // Override inline display:none
         });
 
         // Play Again (Same Party)
