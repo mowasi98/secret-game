@@ -1163,16 +1163,18 @@ io.on('connection', (socket) => {
         game.wheelData.splice(randomIndex, 1);
 
         // Calculate exact rotation to land on the selected segment
-        // Pointer is at top (0°). Wheel segments: personal (0-180°), gossip (180-360°)
-        // To land under pointer, rotate wheel so segment center is at 0°
+        // Pointer is at top (0°). 4 segments alternating PERSONAL/GOSSIP
+        // Segment centers: PERSONAL at 45° & 225°, GOSSIP at 135° & 315°
+        // Randomly pick one of the two possible segments for variety
         const segmentAngles = {
-            personal: 270,     // Rotate 270° to bring personal (90° center) to top
-            gossip: 90     // Rotate 90° to bring gossip (270° center) to top
+            personal: [315, 135],  // Rotate to bring 45° or 225° center to top
+            gossip: [225, 45]       // Rotate to bring 135° or 315° center to top
         };
         
-        const targetAngle = segmentAngles[selectedItem.type];
+        const possibleAngles = segmentAngles[selectedItem.type];
+        const targetAngle = possibleAngles[Math.floor(Math.random() * possibleAngles.length)];
         const fullRotations = 5; // 5 full spins before landing
-        const randomOffset = (Math.random() - 0.5) * 40; // Random variation within segment
+        const randomOffset = (Math.random() - 0.5) * 30; // Random variation within segment (smaller for 90° segments)
         const finalRotation = (fullRotations * 360) + targetAngle + randomOffset;
 
         // Store current rotation for reconnecting players

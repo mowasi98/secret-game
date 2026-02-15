@@ -96,16 +96,34 @@
                             </filter>
                         </defs>
                         <g transform="translate(200, 200)">
-                            <!-- PERSONAL (Top Half: 0-180°) -->
-                            <path d="M 0,-170 A 170,170 0 0,1 170,0 A 170,170 0 0,1 0,170 L 0,0 Z" fill="url(#personalGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
-                            <g transform="rotate(90)">
-                                <text x="0" y="-85" fill="white" font-size="20" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">🔍 PERSONAL</text>
+                            <!-- 4 Segments: Alternating PERSONAL and GOSSIP -->
+                            
+                            <!-- Segment 1: PERSONAL (0-90°, top-right quarter) -->
+                            <path d="M 0,-170 A 170,170 0 0,1 170,0 L 0,0 Z" fill="url(#personalGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(45)">
+                                <text x="0" y="-85" fill="white" font-size="18" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">🔍</text>
+                                <text x="0" y="-65" fill="white" font-size="14" font-weight="800" font-family="Poppins" text-anchor="middle">PERSONAL</text>
                             </g>
                             
-                            <!-- GOSSIP (Bottom Half: 180-360°) -->
-                            <path d="M 0,170 A 170,170 0 0,1 -170,0 A 170,170 0 0,1 0,-170 L 0,0 Z" fill="url(#gossipGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
-                            <g transform="rotate(270)">
-                                <text x="0" y="-85" fill="white" font-size="24" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💬 GOSSIP</text>
+                            <!-- Segment 2: GOSSIP (90-180°, bottom-right quarter) -->
+                            <path d="M 170,0 A 170,170 0 0,1 0,170 L 0,0 Z" fill="url(#gossipGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(135)">
+                                <text x="0" y="-85" fill="white" font-size="18" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💬</text>
+                                <text x="0" y="-65" fill="white" font-size="14" font-weight="800" font-family="Poppins" text-anchor="middle">GOSSIP</text>
+                            </g>
+                            
+                            <!-- Segment 3: PERSONAL (180-270°, bottom-left quarter) -->
+                            <path d="M 0,170 A 170,170 0 0,1 -170,0 L 0,0 Z" fill="url(#personalGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(225)">
+                                <text x="0" y="-85" fill="white" font-size="18" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">🔍</text>
+                                <text x="0" y="-65" fill="white" font-size="14" font-weight="800" font-family="Poppins" text-anchor="middle">PERSONAL</text>
+                            </g>
+                            
+                            <!-- Segment 4: GOSSIP (270-360°, top-left quarter) -->
+                            <path d="M -170,0 A 170,170 0 0,1 0,-170 L 0,0 Z" fill="url(#gossipGrad)" stroke="#1a1a2e" stroke-width="3" filter="url(#innerShadow)"/>
+                            <g transform="rotate(315)">
+                                <text x="0" y="-85" fill="white" font-size="18" font-weight="900" font-family="Poppins" text-anchor="middle" letter-spacing="1">💬</text>
+                                <text x="0" y="-65" fill="white" font-size="14" font-weight="800" font-family="Poppins" text-anchor="middle">GOSSIP</text>
                             </g>
                             
                             <!-- Center circle -->
@@ -260,7 +278,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // VERSION CHECK - Look for this in console (F12)
-        const APP_VERSION = 'v2.9.1';
+        const APP_VERSION = 'v2.9.2';
         console.log('%c🎮 SECRET GAME LOADED', 'color: #6c3aed; font-size: 20px; font-weight: bold;');
         console.log('%cVersion: ' + APP_VERSION, 'color: #2d5cf6; font-size: 16px; font-weight: bold;');
         console.log('%cLast Update: FIX - Blank confirmation page + 0/0 voted issue', 'color: #999; font-size: 12px;');
