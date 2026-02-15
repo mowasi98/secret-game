@@ -676,11 +676,37 @@
 
             if (game.status === 'playing' && game.questions && game.questions[game.currentQuestionIndex]) {
                 const currentQ = game.questions[game.currentQuestionIndex];
+                const currentIsPublic = typeof currentQ === 'object' ? currentQ.isPublic : false;
+                const currentText = typeof currentQ === 'object' ? currentQ.text : currentQ;
+                const questionType = currentIsPublic ? '🌐 Public' : '🔒 Anonymous';
+                
                 statusHTML += `
                     <div style="font-size: 1.5rem; margin: 20px 0; padding: 20px; background: rgba(108, 58, 237, 0.2); border-radius: 12px;">
-                        <strong>Question ${game.currentQuestionIndex + 1}/${game.questions.length}:</strong><br>
-                        "${currentQ}"
+                        <strong>Question ${game.currentQuestionIndex + 1}/${game.questions.length}:</strong> ${questionType}<br>
+                        "${currentText}"
                     </div>
+                `;
+                
+                // Show next question preview if available
+                if (game.currentQuestionIndex + 1 < game.questions.length) {
+                    const nextQ = game.questions[game.currentQuestionIndex + 1];
+                    const nextIsPublic = typeof nextQ === 'object' ? nextQ.isPublic : false;
+                    const nextText = typeof nextQ === 'object' ? nextQ.text : nextQ;
+                    const nextType = nextIsPublic ? '🌐 Public' : '🔒 Anonymous';
+                    
+                    statusHTML += `
+                        <div style="font-size: 1rem; margin: 15px 0; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border-left: 3px solid #6c3aed;">
+                            <strong>⏭️ Next Question:</strong> ${nextType}<br>
+                            <span style="opacity: 0.8;">"${nextText}"</span>
+                        </div>
+                    `;
+                }
+                
+                // Add Next Question button for admin control
+                statusHTML += `
+                    <button class="glass-btn" id="adminNextQuestionBtn" style="margin-top: 15px; background: rgba(108, 58, 237, 0.3);">
+                        Next Question ➜
+                    </button>
                 `;
 
                 // Show voting options if available
@@ -727,6 +753,16 @@
             }
 
             document.getElementById('currentStatusContent').innerHTML = statusHTML;
+            
+            // Add event listener for admin Next Question button (if it exists)
+            const adminNextBtn = document.getElementById('adminNextQuestionBtn');
+            if (adminNextBtn) {
+                adminNextBtn.addEventListener('click', () => {
+                    socket.emit('next-question', { gameCode: game.code });
+                    adminNextBtn.disabled = true;
+                    adminNextBtn.textContent = '✓ Moving to next question...';
+                });
+            }
 
             // Display players (prepare data)
             displayPlayersList(game.players, game.adminId);
